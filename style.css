@@ -1,55 +1,81 @@
 body{
-    background-color: bisque;
-    text-align: center;
+    background-color: rgb(48, 47, 47);
     padding: 0;
     margin: 0;
     font-family: Arial, sans-serif;
 }
 
-
-input {
-    width: 40%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+.heading{
+    display: flex;
+    align-items: center;
+    justify-content: space-between; 
+    padding: 2px;
+    margin-left: 4px;
 }
 
 h1{
-    color:darkblue;
+    text-align: left;
+    color:rgb(24, 19, 169);
+    font-size: 30px;
+    display: inline;
+    background: linear-gradient(to right,rgb(226, 137, 137),aqua);
+    font-weight: 700;
+    border: 10px;
+    padding: 8px;
+    margin: 4px;
+    border-radius: 30px;
+    text-shadow: 1.5px 1.5px;
 }
 
-/* .container {
-    width: 80%;
-    margin: 20px auto;
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-}*/
+.search-container {
+    display: flex; 
+    padding: 0.5px;
+    
+}
 
-.movies-container {
+.search{
+    --padding: 7px;
+    width:  250px;
     display: flex;
-    justify-content: center;
-    gap: 20px;
-    flex-wrap: nowrap;
+    padding: var(--padding);
+    border-radius: 28px;
+    background: #f6f6f6;
+    transition: background 0.25s;
 }
 
-
-.movie-card {
-    background: #fff;
-    padding: 15px;
-    border-radius: 5px;
-    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
-    width: 10%;
-    text-align: center;
+.search:focus-within{
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.75);
 }
-
-button {
-    padding: 10px 15px;
-    background: #007bff;
-    color: white;
+.search-input{
+    font-family: Arial;
+    color: #333333;
+    margin-left: var(--padding);
+    outline: none;
     border: none;
-    border-radius: 5px;
-    cursor: pointer;
+    background: transparent;
+    flex: 1;
+    width: 300px;
 }
+
+.search-input::placeholder,
+.search-icon{
+    color:rgba(0, 0, 0, 0.45);
+    }
+
+.profile{
+    padding: 4px 6px 2px 6px;
+    margin-right:9px;
+    margin-top:2px;
+    color:rgb(24, 19, 169);
+    font-size: 8px;
+    font-family: Arial;
+    background-color: rgb(153, 104, 173);
+    border-radius: 140px;
+    font-weight: 700;
+}
+
+img{
+    width: 45px; 
+    height: auto;
+}
+
