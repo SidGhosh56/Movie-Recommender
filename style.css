@@ -64,7 +64,7 @@ h1 {
 
 /* Profile */
 .profile {
-    padding: 4px 6px;
+    padding: 4px 6px 2px 6px;
     margin-right: 9px;
     margin-top: 2px;
     color: rgb(24, 19, 169);
@@ -77,7 +77,7 @@ h1 {
 
 /* Profile Image */
 img {
-    width: 45px; 
+    width: 40px; 
     height: auto;
     border-radius: 50%; /* Make it circular */
 }
@@ -90,7 +90,7 @@ img {
 /* Side Column */
 .side {
     width: 150px; /* Fixed width */
-    background-color: rgb(19, 169, 141);
+    background-color: /*rgb(159, 19, 169)*/#024578;
     padding: 10px;
     text-align: center;
     border-radius: 4px;
@@ -110,25 +110,32 @@ img {
 
 /* Sections */
 .section-1 {
-    background-color: rgb(83, 184, 224);
+    background-color: rgb(116, 180, 206);
     padding: 20px;
     border-radius: 4px;
     height: 45%;
+    text-align: center;
 }
 
 .section-2,.section-3 {
-    background-color:rgb(83, 184, 224);
-    padding: 20px;
+    background-color: rgb(116, 180, 206);
+   padding: 20px;
     border-radius: 4px;
     height: 28%;
+    text-align: center;
    
 }
 
 footer{
-    background-color: #40143b;
+    background-color: #1e0048;
     color:rgb(204, 146, 212);
     text-align: center;
     padding: 10px;
 }
 
 
+.p1{
+    height: 22.5%;
+    padding-top: 4px;
+    
+}
