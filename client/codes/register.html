@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Register | CineVortex</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="login.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+</head>
+<body>
+  <div id="root">
+    <!-- Header -->
+    <div class="heading">
+      <h1>CineVortex</h1>
+      <a href="project.html" class="home-icon" title="Go to Home">
+        <span class="material-symbols-outlined">home</span>
+    </a>
+      <div class="search-container">
+        <div class="search">
+          <span class="search-icon material-symbols-outlined">search</span>
+          <input class="search-input" type="search" placeholder="Search" />
+        </div>
+      </div>
+      <div class="profile"> 
+        <img id="profile-img" src="https://cdn-icons-png.flaticon.com/512/6522/6522516.png" />
+        <div id="dropdown" class="dropdown-menu">
+          <ul>
+            <li onclick="location.href='profile.html'">Profile</li>
+            <li onclick="location.href='settings.html'">Settings</li>
+            <li onclick="location.href='login.html'">Login</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Registration Box -->
+    <div class="login-box">
+      <h2>Create an Account</h2>
+      <input type="text" placeholder="Full Name" required />
+      <input type="email" placeholder="Email" required />
+      <input type="text" placeholder="Username" required />
+      <input type="password" placeholder="Password" required />
+      <input type="password" placeholder="Confirm Password" required />
+      <button>Register</button>
+      <p class="register-link">Already have an account? <a href="login.html">Login here</a></p>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <p>Contact Us</p>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
