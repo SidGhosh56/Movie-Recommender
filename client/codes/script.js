@@ -39,16 +39,33 @@ document.getElementById("prev").addEventListener("click", prevSlide);
 
 // Auto slide
 function startSlideShow() {
-    slideInterval = setInterval(nextSlide, 15000);
+    slideInterval = setInterval(nextSlide, 10000);
 }
 
 function stopSlideShow() {
     clearInterval(slideInterval);
 }
 
-const slider = document.getElementById("slider");
+/*const slider = document.getElementById("slider");
 slider.addEventListener("mouseenter", stopSlideShow);
-slider.addEventListener("mouseleave", startSlideShow);
+slider.addEventListener("mouseleave", startSlideShow);*/
 
 startSlideShow();
+
+const menuToggle = document.getElementById("menu-toggle");
+const sidebar = document.getElementById("sidebar");
+const overlay = document.querySelector('.overlay');
+
+menuToggle.addEventListener("click", () => {
+    sidebar.classList.toggle("open");
+    overlay.classList.toggle('show');
+});
+
+
+document.addEventListener("click", (e) => {
+    if (!menuToggle.contains(e.target) && !sidebar.contains(e.target)) {
+        sidebar.classList.remove("open");
+        overlay.classList.remove('show');
+    }
+});
 

@@ -15,37 +15,50 @@ body {
 .heading {
     display: flex;
     align-items: center;
-    justify-content: space-between; 
-    padding: 10px;
-    background: rgb(34, 34, 34);
+    justify-content: space-between;
+    padding: 8px 20px;
+    background: #222;
+    height: 60px;
+    position: relative;
+    z-index: 10;
+    gap: 0; 
+}
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
+
 h1 {
-    font-size: 30px;
+    font-size: 38px;
     font-weight: 700;
-    padding: 8px;
-    margin: 4px;
+    margin:0;
     border-radius: 30px;
     background: linear-gradient(to right, rgb(226, 137, 137), aqua);
     background-clip: text;
     -webkit-background-clip: text;
     color: transparent;
     text-shadow: 1px 1px rgba(0, 0, 0, 0.31);
-    gap: 8px;
+    white-space: nowrap;
 }
 
 /* Search Bar */
 .search-container {
-    display: flex; 
-    padding: 5px;
+    flex: 1;
+    display: flex;
+    margin-left: 300px;
+    
 }
 
+
 .search {
-    --padding: 7px;
-    width: 250px;
     display: flex;
-    padding: var(--padding);
-    border-radius: 28px;
+    align-items: center;
+    background: #f6f6f6;
+    padding: 7px 10px;
+    border-radius: 30px;
+    width: 300px;
     background: #f6f6f6;
     transition: background 0.25s;
 }
@@ -82,7 +95,12 @@ h1 {
     filter: brightness(70%);
 }
 
-
+.home-container {
+    margin-left: 15px;
+    margin-right: auto;
+    display: flex;
+    align-items: center;
+}
 
 /* Profile Image */
 img {
@@ -96,15 +114,34 @@ img {
     height: 100vh; /* Make the layout full height */
 }
 
-/* Side Column */
+.menu-toggle {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin-right: 10px;
+    color: white;
+    font-size: 28px;
+}
+
 .side {
-    width: 150px; /* Fixed width */
-    background-color: /*rgb(159, 19, 169)*/#024578;
+    position: fixed;
+    top: 70px; /* adjust based on your header height */
+    left: -170px; /* hide it initially */
+    width: 150px;
+    height: 78.5%;
+    background-color: #024578;
     padding: 10px;
     text-align: center;
-    border-radius: 4px;
-    margin: 2px;
+    border-radius: 0 8px 8px 0;
+    transition: left 0.3s ease;
+    z-index: 100;
 }
+
+.side.open {
+    left: 0;
+}
+
+
 hr{
     width: 100%;
 }
@@ -116,7 +153,7 @@ hr{
     gap: 5px; /* Adds space between sections */
     padding: 5px;
     /*background-color: rgb(81, 14, 81);*/
-    background: linear-gradient(to right, rgb(93, 37, 146), rgb(58, 56, 163));
+    background: linear-gradient(to right, rgb(48, 47, 47), rgb(48, 47, 47));
 }
 
 /* Sections */
@@ -217,10 +254,11 @@ footer{
     opacity: 0;
     transition: opacity 1s ease-in-out;
     font-size: 24px;
-    color: white;
+    color: rgb(15, 45, 53);
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: opacity 0.35s ease-in-out;
   }
   
   .slide.active {
@@ -298,3 +336,17 @@ footer{
     color: aqua;
   }
   
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Adjust darkness */
+    z-index: 50;
+    display: none; /* Hidden by default */
+    transition: opacity 0.3s ease;
+}
+.overlay.show {
+    display: block;
+}
