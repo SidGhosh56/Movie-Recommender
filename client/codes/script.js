@@ -33,9 +33,9 @@ function prevSlide() {
     showSlide(currentSlide);
 }
 
-// Manual controls
-document.getElementById("next").addEventListener("click", nextSlide);
-document.getElementById("prev").addEventListener("click", prevSlide);
+// Manual controls (Remove or comment if no longer needed)
+document.getElementById("next")?.addEventListener("click", nextSlide);
+document.getElementById("prev")?.addEventListener("click", prevSlide);
 
 // Auto slide
 function startSlideShow() {
@@ -46,22 +46,19 @@ function stopSlideShow() {
     clearInterval(slideInterval);
 }
 
-/*const slider = document.getElementById("slider");
-slider.addEventListener("mouseenter", stopSlideShow);
-slider.addEventListener("mouseleave", startSlideShow);*/
-
 startSlideShow();
 
+// Sidebar Toggle Code
 const menuToggle = document.getElementById("menu-toggle");
 const sidebar = document.getElementById("sidebar");
 const overlay = document.querySelector('.overlay');
 
 menuToggle.addEventListener("click", () => {
-    sidebar.classList.toggle("open");
-    overlay.classList.toggle('show');
+    sidebar.classList.toggle("open"); // Toggles the sidebar visibility
+    overlay.classList.toggle('show'); // Toggles the overlay visibility
 });
 
-
+// Close sidebar if clicking outside of sidebar or menuToggle
 document.addEventListener("click", (e) => {
     if (!menuToggle.contains(e.target) && !sidebar.contains(e.target)) {
         sidebar.classList.remove("open");
@@ -69,3 +66,7 @@ document.addEventListener("click", (e) => {
     }
 });
 
+// Prevent the sidebar from closing when clicking inside
+sidebar.addEventListener("click", (e) => {
+    e.stopPropagation(); // Prevent click from propagating to the document
+});

@@ -2,6 +2,7 @@
 html, body {
     height: 100%;
     margin: 0;
+    padding: 0;
     display: flex;
     flex-direction: column;
 }
@@ -9,6 +10,7 @@ html, body {
 body {
     background-color: rgb(48, 47, 47);
     font-family: Arial, sans-serif;
+    overflow: hidden;
 }
 
 /* Header Section */
@@ -22,11 +24,13 @@ body {
     position: relative;
     z-index: 10;
     gap: 0; 
+    flex-wrap: nowwrap;
 }
 .header-left {
     display: flex;
     align-items: center;
     gap: 10px;
+    flex-shrink: 0;
 }
 
 
@@ -112,6 +116,8 @@ img {
 .container {
     display: flex;
     height: 100vh; /* Make the layout full height */
+    flex-direction: row;
+    overflow: hidden;
 }
 
 .menu-toggle {
@@ -128,7 +134,7 @@ img {
     top: 70px; /* adjust based on your header height */
     left: -170px; /* hide it initially */
     width: 150px;
-    height: 78.5%;
+    height: calc(100vh - 150px);
     background-color: #024578;
     padding: 10px;
     text-align: center;
@@ -154,6 +160,7 @@ hr{
     padding: 5px;
     /*background-color: rgb(81, 14, 81);*/
     background: linear-gradient(to right, rgb(48, 47, 47), rgb(48, 47, 47));
+    overflow: auto;
 }
 
 /* Sections */
@@ -274,7 +281,7 @@ footer{
     color: white;
     cursor: pointer;
     padding: 10px;
-    z-index: 2;
+    z-index: 10;
     user-select: none;
     background-color: rgba(0, 0, 0, 0.3);
     border-radius: 50%;
@@ -349,4 +356,24 @@ footer{
 }
 .overlay.show {
     display: block;
+}
+
+@media (max-width: 768px) {
+    .heading {
+        flex-direction: row; /* Keep it in a row */
+        flex-wrap: nowrap; /* Prevent wrapping */
+        justify-content: space-between;
+    }
+
+    .search-container {
+        flex-grow: 1;
+        margin-left: 10px; /* Add a small margin */
+        justify-content: center; /* Align to the right */
+    }
+
+    /* Optionally, adjust profile icon's position */
+    .profile {
+        margin-top: 0;
+        justify-content: right; 
+    }
 }

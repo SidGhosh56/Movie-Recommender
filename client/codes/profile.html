@@ -1,55 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Profile | CineVortex</title>
-  <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+	<meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1"> 
+	<link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <title> CineVortex </title>
 </head>
 
 <body>
-  <div id="root">
+    <div id="root">
+        <!-- HEADER -->
+        <div class="heading">
+            
+            <div class="header-left">
+                <!-- Menu Icon -->
+            <div class="menu-toggle" id="menu-toggle">
+                <span class="material-symbols-outlined">menu</span>
+            </div>
 
-    <div class="heading">
+            <h1 class="logo">Cine<span>Vortex</span></h1>
 
+                <!-- Home Icon -->
+            <div class="home-container">
+            <a href="project.html" class="home-icon" title="Go to Home">
+                <span class="material-symbols-outlined">home</span>
+            </a>
+            </div>
+            </div>
+            <!-- Search Bar -->
+            <div class="search-container">
+                <div class="search">
+                    <span class="search-icon material-symbols-outlined">search</span>
+                    <input class="search-input" type="search" placeholder="Search">
+                </div>
+            </div>
 
-      <h1>CineVortex</h1>
-      <a href="project.html" class="home-icon" title="Go to Home">
-        <span class="material-symbols-outlined">home</span>
-    </a>
-
-      <div class="search-container">
-        <div class="search">
-          <span class="search-icon material-symbols-outlined">search</span>
-          <input class="search-input" type="search" placeholder="Search" />
+            <!-- Profile -->
+            <div class="profile"> 
+                <img id="profile-img" src="https://cdn-icons-png.flaticon.com/512/6522/6522516.png">
+                <div id="dropdown" class="dropdown-menu">
+                    <ul>
+                        <li onclick="location.href='profile.html'">Profile</li>
+                        <li onclick="location.href='settings.html'">Settings</li>
+                        <li onclick="location.href='login.html'">Login</li>
+                    </ul>
+                </div>
+            </div>
         </div>
-      </div>
 
-      <div class="profile"> 
-        <img id="profile-img" src="https://cdn-icons-png.flaticon.com/512/6522/6522516.png" />
-        <div id="dropdown" class="dropdown-menu">
-          <ul>
-            <li onclick="location.href='profile.html'">Profile</li>
-            <li onclick="location.href='settings.html'">Settings</li>
-            <li onclick="location.href='login.html'">Login</li>
-          </ul>
+        <!-- SIDEBAR -->
+        <div class="side" id="sidebar">
+            <a href="watchlist.html"><div class="p1">Watchlist</div></a>
+            <hr>
+            <a href="tracker.html"><div class="p1">Tracker</div></a>
+            <hr>
+            <a href="surprise.html"><div class="p1">Surprise Me</div></a>
+            <hr>
+            <a href="community.html"><div class="p1">Community</div></a>
+
         </div>
-      </div>
+        
+        <!-- DARK OVERLAY -->
+        <div class="overlay" id="overlay"></div>
 
-      
+        <!-- MAIN CONTENT -->
+        <div class="container">
+          <div class="profile-box">
+            <h2>Welcome To Your Profile</h2>
+            <!-- Additional profile content can go here -->
+          </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer>
+            <p>Contact Us</p>
+        </footer>
+
+        <script src="script.js"></script>
     </div>
-
-    <div class="profile-box">
-      <h2>Welcome to Your Profile</h2>
-      <!-- Additional profile content can go here -->
-    </div>
-
-    <footer>
-      <p>Contact Us</p>
-    </footer>
-  </div>
-
-  <script src="script.js"></script>
 </body>
 </html>
