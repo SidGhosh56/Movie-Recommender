@@ -412,7 +412,15 @@ button#surpriseBtn, button#anotherBtn {
 
 
 /*WATCHLIST */
-
+.no-data {
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.125rem;
+    color: #787878;
+    width: max-content;
+    white-space: nowrap;
+    margin-bottom: 1em;
+}
 
 .page-nav{
     color: white;
@@ -422,4 +430,13 @@ button#surpriseBtn, button#anotherBtn {
     display: flex;
     gap: 0.3em;
     
+}
+
+.body-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 60vh; /* or 100vh depending on your layout */
+    text-align: center;
 }
