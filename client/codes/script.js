@@ -175,3 +175,26 @@ function renderWatchlistApology(){
                 </div>
     `
 }
+
+
+//SETTINGS
+document.getElementById("save-btn").addEventListener("click", () => {
+  const email = document.getElementById("email-input").value;
+  const username = document.getElementById("username-input").value;
+  const darkMode = document.getElementById("darkmode-toggle").checked;
+  const emailNotif = document.getElementById("email-notif").checked;
+  const smsNotif = document.getElementById("sms-notif").checked;
+
+  // Placeholder for saving logic
+  console.log("Settings saved:", {
+    email,
+    username,
+    darkMode,
+    emailNotif,
+    smsNotif
+  });
+
+  const status = document.getElementById("save-status");
+  status.textContent = "Settings saved successfully!";
+  setTimeout(() => (status.textContent = ""), 3000);
+});
