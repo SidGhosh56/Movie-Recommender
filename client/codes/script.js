@@ -198,3 +198,68 @@ document.getElementById("save-btn").addEventListener("click", () => {
   status.textContent = "Settings saved successfully!";
   setTimeout(() => (status.textContent = ""), 3000);
 });
+
+
+//PROFILE 
+
+const editBtn = document.getElementById('edit-profile-btn');
+const saveBtn = document.getElementById('save-profile-btn');
+const bioInput = document.getElementById('user-bio');
+const genresInput = document.getElementById('user-genres');
+
+// Disable inputs by default
+bioInput.disabled = true;
+genresInput.disabled = true;
+
+editBtn.addEventListener('click', () => {
+  bioInput.disabled = false;
+  genresInput.disabled = false;
+  saveBtn.style.display = 'inline-block';
+  editBtn.style.display = 'none';
+});
+
+saveBtn.addEventListener('click', () => {
+  bioInput.disabled = true;
+  genresInput.disabled = true;
+  editBtn.style.display = 'inline-block';
+  saveBtn.style.display = 'none';
+
+  // Simulate save action
+  alert('Profile updated!');
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const daySelect = document.getElementById('dob-day');
+  const monthSelect = document.getElementById('dob-month');
+  const yearSelect = document.getElementById('dob-year');
+
+  // Populate days (1-31)
+  for (let d = 1; d <= 31; d++) {
+    const option = document.createElement('option');
+    option.value = d;
+    option.textContent = d;
+    daySelect.appendChild(option);
+  }
+
+  // Populate months (January to December)
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  months.forEach((month, index) => {
+    const option = document.createElement('option');
+    option.value = index + 1;  // Month starts from 1 (January = 1)
+    option.textContent = month;
+    monthSelect.appendChild(option);
+  });
+
+  // Populate years (from current year back to 1900)
+  const currentYear = new Date().getFullYear();
+  for (let y = currentYear; y >= 1900; y--) {
+    const option = document.createElement('option');
+    option.value = y;
+    option.textContent = y;
+    yearSelect.appendChild(option);
+  }
+});
+

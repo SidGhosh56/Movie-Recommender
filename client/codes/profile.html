@@ -68,8 +68,44 @@
         <div class="container">
           <div class="profile-box">
             <h2>Welcome To Your Profile</h2>
-            <!-- Additional profile content can go here -->
-          </div>
+            <div class="profile-container">
+            <div class="profile-header">
+            <div class="profile-pic" id="profile-pic" style="background-image: url('https://cdn-icons-png.flaticon.com/512/3106/3106807.png');"></div>
+            <div class="profile-info">
+             <h3 id="profile-name">Username</h3>
+             <p id="profile-email">user123@example.com</p>
+            </div>
+        </div>
+
+        <div class="profile-details">
+        <label for="user-bio">Bio:</label>
+         <textarea id="user-bio" rows="3" placeholder="Tell us something about yourself..."></textarea>
+
+         <label>Date of Birth:</label>
+        <div class="dob-container">
+        <select id="dob-day">
+            <option value="">Day</option>
+        </select>
+        <select id="dob-month">
+            <option value="">Month</option>
+        </select>
+        <select id="dob-year">
+            <option value="">Year</option>
+        </select>
+        </div>
+
+
+         <label for="user-genres">Favorite Genres:</label>
+         <input type="text" id="user-genres" placeholder="e.g., Action, Sci-Fi, Comedy">
+        </div>
+
+        <div class="profile-buttons">
+        <button id="edit-profile-btn">Edit Profile</button>
+        <button id="save-profile-btn" style="display: none;">Save Changes</button>
+        <button id="logout-btn">Log Out</button>
+        </div>
+        </div>
+        </div>
         </div>
 
         <!-- FOOTER -->
