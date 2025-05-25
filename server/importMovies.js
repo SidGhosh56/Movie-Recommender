@@ -11,12 +11,12 @@ const connectDB = async () => {
         });
         console.log("MongoDB connected ✅");
 
-        const movies = await csv().fromFile("./import/final_1.csv");
+        const movies = await csv().fromFile("./import/project.csv");
 
         await Movie.insertMany(movies);
         console.log("Movies imported 🎬");
 
-        process.exit(); // Done
+        process.exit(); 
     } catch (error) {
         console.error("Error:", error);
         process.exit(1);

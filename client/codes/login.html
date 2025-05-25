@@ -8,41 +8,100 @@
   <link rel="stylesheet" href="login.css" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 </head>
+
 <body>
-  <div id="root">
-    <!-- Header -->
-    <div class="heading">
-      <h1>CineVortex</h1>
-      <a href="project.html" class="home-icon" title="Go to Home">
-        <span class="material-symbols-outlined">home</span>
-    </a>    
-      <div class="search-container">
-        <div class="search">
-          <span class="search-icon material-symbols-outlined">search</span>
-          <input class="search-input" type="search" placeholder="Search" />
+    <div id="root">
+        <!-- HEADER -->
+        <div class="heading">
+            
+            <div class="header-left">
+                <!-- Menu Icon -->
+            <div class="menu-toggle" id="menu-toggle">
+                <span class="material-symbols-outlined">menu</span>
+            </div>
+
+            <h1 class="logo">Cine<span>Vortex</span></h1>
+
+                <!-- Home Icon -->
+            <div class="home-container">
+            <a href="project.html" class="home-icon" title="Go to Home">
+                <span class="material-symbols-outlined">home</span>
+            </a>
+            </div>
+            </div>
+            <!-- Search Bar -->
+            <div class="search-container">
+                <div class="search">
+                    <span class="search-icon material-symbols-outlined">search</span>
+                    <input class="search-input" type="search" placeholder="Search">
+                </div>
+            </div>
+
+            <!-- Profile -->
+            <div class="profile"> 
+                <img id="profile-img" src="https://cdn-icons-png.flaticon.com/512/6522/6522516.png">
+                <div id="dropdown" class="dropdown-menu">
+                    <ul>
+                        <li onclick="location.href='profile.html'">Profile</li>
+                        <li onclick="location.href='settings.html'">Settings</li>
+                        <li onclick="location.href='login.html'">Login</li>
+                    </ul>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="profile"> 
-        <img id="profile-img" src="https://cdn-icons-png.flaticon.com/512/6522/6522516.png" />
-        <div id="dropdown" class="dropdown-menu">
-          <ul>
-            <li onclick="location.href='profile.html'">Profile</li>
-            <li onclick="location.href='settings.html'">Settings</li>
-            <li onclick="location.href='login.html'">Login</li>
-          </ul>
+
+        <!-- SIDEBAR -->
+        <div class="side" id="sidebar">
+            <a href="watchlist.html"><div class="p1">Watchlist</div></a>
+            <hr>
+            <a href="tracker.html"><div class="p1">Tracker</div></a>
+            <hr>
+            <a href="surprise.html"><div class="p1">Surprise Me</div></a>
+            <hr>
+            <a href="community.html"><div class="p1">Community</div></a>
+
         </div>
-      </div>
-    </div>
 
     <!-- Login Form -->
     <div class="login-box">
-      <h2>Login to CineVortex</h2>
-      <input type="text" placeholder="Username" required />
-      <input type="password" placeholder="Password" required />
-      <button>Login</button>
-      <p class="register-link">Don't have an account? <a href="register.html">Register here</a></p>
+        <h2>Login to CineVortex</h2>
+        <input type="text" id="username" placeholder="Username" required />
+        <input type="password" id="password" placeholder="Password" required />
+        <button id="loginBtn">Login</button>
+        <p class="register-link">Don't have an account? <a href="register.html">Register here</a></p>
     </div>
+    <script>
+        document.getElementById('loginBtn').addEventListener('click', async () => {
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
 
+        if (!username || !password) {
+            alert('Please enter both username and password');
+            return;
+        }
+
+        try {
+            const response = await fetch('http://localhost:3000/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })  // <-- matches your backend now
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+            alert('Login successful!');
+            // Save token if you want: localStorage.setItem('token', data.token);
+            window.location.href = 'project.html';
+            } else {
+            alert(data.message || 'Login failed. Please check your credentials.');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Something went wrong. Please try again.');
+            }
+        });
+    </script>
     <!-- Footer -->
     <footer>
       <p>Contact Us</p>

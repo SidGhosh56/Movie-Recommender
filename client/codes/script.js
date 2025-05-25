@@ -82,15 +82,17 @@ anotherBtn.addEventListener("click", fetchRandomMovie);
 
 async function fetchRandomMovie() {
     try {
-        const res = await fetch("http://localhost:5000/api/surprise");
+        const res = await fetch("http://localhost:3000/api/movies/random");
         const movie = await res.json();
 
-        document.getElementById("movie-poster").src = movie.poster;
+        document.getElementById("movie-poster").src = movie.poster_url;
         document.getElementById("movie-title").textContent = movie.title;
-        document.getElementById("movie-genre").textContent = movie.genre;
-        document.getElementById("movie-description").textContent = movie.description;
+        document.getElementById("movie-genre").textContent = movie.genres;
+        document.getElementById("movie-description").textContent = movie.overview;
 
         movieCard.style.display = "block";
+        document.getElementById("surpriseBtn").style.display = "none";
+        
     } catch (err) {
         alert("Failed to fetch movie. Is the backend running?");
     }
@@ -147,17 +149,17 @@ function updateWatchlistHtml(movie){
 }
 
 function render(){
-    watchlistHtml = ''
+    watchlistHtml = '';
     if(watchlistArr.length){
         watchlistArr.forEach(movie => {
-            updateWatchlistHtml(movie)
-            renderWatchlist()
-        })
+            updateWatchlistHtml(movie);
+        });
+        renderWatchlist();
     } else {
-        renderWatchlistApology()
+        renderWatchlistApology();
     }
-
 }
+
 
 function renderWatchlist(){
     document.getElementById('watchlist-container').innerHTML = watchlistHtml
@@ -263,3 +265,52 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+document.getElementById('register-form').addEventListener('submit', async (e) => {
+  e.preventDefault();  // Prevent default form submission
+
+  // Get values from the form inputs
+  const username = document.getElementById('username').value;
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
+
+  // Validate the form fields (you can add more checks)
+  if (password !== confirmPassword) {
+    alert("Passwords don't match!");
+    return;
+  }
+
+  // Prepare the data to be sent to the server
+  const userData = {
+    username,
+    email,
+    password,
+    confirmPassword
+  };
+
+  try {
+    // Send a POST request to the backend API to register the user
+    const response = await fetch('http://localhost:3000/api/auth/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userData),
+    });
+
+    // Parse the JSON response from the backend
+    const data = await response.json();
+
+    if (response.ok) {
+      // Registration successful, show a message or redirect to login
+      alert('User registered successfully!');
+      window.location.href = 'login.html'; // Redirect to login page
+    } else {
+      // Show any error message from the backend
+      alert(data.message || 'Registration failed!');
+    }
+  } catch (error) {
+    console.error('Error during registration:', error);
+    alert('An error occurred. Please try again later.');
+  }
+});

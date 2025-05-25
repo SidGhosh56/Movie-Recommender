@@ -12,7 +12,8 @@ const movieSchema = new mongoose.Schema({
     votes: Number,
     rating: Number,
     popularity: Number,
-    budget: Number
+    budget: Number,
+    poster_url: String
 });
 
 module.exports = mongoose.model("Movie", movieSchema);
