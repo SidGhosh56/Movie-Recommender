@@ -7,6 +7,7 @@ const movieRoutes = require('./routes/movies');
 const axios = require('axios');
 const recommendRoute = require('./routes/recommend');
 const authRoutes = require('./routes/authRoutes'); // Import auth routes
+const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 connectDB(); // ✅ Connect to DB
@@ -14,6 +15,7 @@ connectDB(); // ✅ Connect to DB
 app.use(cors());
 app.use(express.json());
 app.use("/api/movies", movieRoutes);
+app.use('/api/users', userRoutes);
 
 // === Route to call Python model for recommendations ===
 app.post("/api/recommend", async (req, res) => {

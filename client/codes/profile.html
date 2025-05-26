@@ -79,7 +79,7 @@
 
         <div class="profile-details">
             <label for="user-name">Name:</label>
-         <textarea id="user-name" rows="1" placeholder="Your Name"></textarea>
+         <input id="user-name" rows="1" placeholder="Your Name">
 
         <label for="user-bio">Bio:</label>
          <textarea id="user-bio" rows="3" placeholder="Tell us something about yourself..."></textarea>
@@ -87,7 +87,7 @@
          <label>Date of Birth:</label>
         <div class="dob-container" id="dob-fields">
         <select id="dob-day" disabled>
-            <option value="dob-day">Day</option>
+            <option value="">Day</option>
         </select>
         <select id="dob-month" disabled>
             <option value="">Month</option>
@@ -115,129 +115,149 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-        // Elements
-        const profileNameDisplay = document.getElementById('profile-name');
-        const profileEmailDisplay = document.getElementById('profile-email');
-        const userNameInput = document.getElementById('user-name');
-        const userBioInput = document.getElementById('user-bio');
-        const userGenresInput = document.getElementById('user-genres');
+    const profileNameDisplay = document.getElementById('profile-name');
+    const profileEmailDisplay = document.getElementById('profile-email');
+    const userNameInput = document.getElementById('user-name');
+    const userBioInput = document.getElementById('user-bio');
+    const userGenresInput = document.getElementById('user-genres');
 
-        const editBtn = document.getElementById('edit-profile-btn');
-        const saveBtn = document.getElementById('save-profile-btn');
-        const logoutBtn = document.getElementById('logout-btn');
+    const editBtn = document.getElementById('edit-profile-btn');
+    const saveBtn = document.getElementById('save-profile-btn');
+    const logoutBtn = document.getElementById('logout-btn');
 
-        // Load data from localStorage and fill fields
-        function loadProfile() {
-            const username = localStorage.getItem('username') || 'Username';
-            const email = localStorage.getItem('email') || 'user@example.com';
-            const name = localStorage.getItem('fullName') || '';
+    const daySelect = document.getElementById("dob-day");
+    const monthSelect = document.getElementById("dob-month");
+    const yearSelect = document.getElementById("dob-year");
 
-            profileNameDisplay.textContent = username;
-            profileEmailDisplay.textContent = email;
-            userNameInput.value = name;
-
-            // Optional: Load bio and genres if stored previously
-            userBioInput.value = localStorage.getItem('userBio') || '';
-            userGenresInput.value = localStorage.getItem('userGenres') || '';
-
-            // Disable inputs by default
-            userNameInput.disabled = true;
-            userBioInput.disabled = true;
-            userGenresInput.disabled = true;
-        }
-
-        loadProfile();
-
-        const daySelect = document.getElementById("dob-day");
-        const monthSelect = document.getElementById("dob-month");
-        const yearSelect = document.getElementById("dob-year");
-
-        for (let i = 1; i <= 31; i++) {
+    // Populate day select
+    for (let i = 1; i <= 31; i++) {
         const option = document.createElement("option");
         option.value = i;
         option.textContent = i;
         daySelect.appendChild(option);
-        }
+    }
 
-        const months = [
+    // Populate month select
+    const months = [
         "January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"
-        ];
-
-        months.forEach((month, index) => {
+    ];
+    months.forEach((month, index) => {
         const option = document.createElement("option");
         option.value = index + 1;
         option.textContent = month;
         monthSelect.appendChild(option);
-        });
+    });
 
-        const currentYear = new Date().getFullYear();
-        for (let y = currentYear; y >= 1900; y--) {
+    // Populate year select
+    const currentYear = new Date().getFullYear();
+    for (let y = currentYear; y >= 1900; y--) {
         const option = document.createElement("option");
         option.value = y;
         option.textContent = y;
         yearSelect.appendChild(option);
+    }
+
+    // Now load profile AFTER dropdowns are ready
+    function loadProfile() {
+        const user = JSON.parse(localStorage.getItem('user'));
+
+        if (!user) {
+            alert('Please log in first.');
+            window.location.href = 'login.html';
+            return;
+        }
+        
+        profileNameDisplay.textContent = user.username;
+        profileEmailDisplay.textContent = user.email;
+
+        userNameInput.value = user.fullName || '';
+        userBioInput.value = user.bio || '';
+        userGenresInput.value = user.genres || '';
+
+        if (user.dob) {
+            daySelect.value = user.dob.day || '';
+            monthSelect.value = user.dob.month || '';
+            yearSelect.value = user.dob.year || '';
         }
 
-        // Enable editing
-        editBtn.addEventListener('click', () => {
-            userNameInput.disabled = false;
-            userBioInput.disabled = false;
-            userGenresInput.disabled = false;
-            daySelect.disabled = false;
-            monthSelect.disabled = false;
-            yearSelect.disabled = false;
+        userNameInput.disabled = true;
+        userBioInput.disabled = true;
+        userGenresInput.disabled = true;
+        daySelect.disabled = true;
+        monthSelect.disabled = true;
+        yearSelect.disabled = true;
+    }
 
-            editBtn.style.display = 'none';
-            saveBtn.style.display = 'inline-block';
-        });
+    loadProfile();
 
-        // Save changes
-        saveBtn.addEventListener('click', () => {
-            const newName = userNameInput.value.trim();
-            const newBio = userBioInput.value.trim();
-            const newGenres = userGenresInput.value.trim();
+    // Enable editing
+    editBtn.addEventListener('click', () => {
+        userNameInput.disabled = false;
+        userBioInput.disabled = false;
+        userGenresInput.disabled = false;
+        daySelect.disabled = false;
+        monthSelect.disabled = false;
+        yearSelect.disabled = false;
 
-            if (newName) {
-            localStorage.setItem('fullName', newName);
-            profileNameDisplay.textContent = newName;
-            }
+        editBtn.style.display = 'none';
+        saveBtn.style.display = 'inline-block';
+    });
 
-            localStorage.setItem('userBio', newBio);
-            localStorage.setItem('userGenres', newGenres);
-            localStorage.setItem('dobDay', daySelect.value);
-            localStorage.setItem('dobMonth', monthSelect.value);
-            localStorage.setItem('dobYear', yearSelect.value);
+    // Save changes
+    saveBtn.addEventListener('click', async () => {
+    const token = localStorage.getItem('token');  // get token here
 
-            userNameInput.disabled = true;
-            userBioInput.disabled = true;
-            userGenresInput.disabled = true;
-            daySelect.disabled = true;
-            monthSelect.disabled = true;
-            yearSelect.disabled = true;
+    const updatedData = {
+        fullName: userNameInput.value.trim(),
+        bio: userBioInput.value.trim(),
+        genres: userGenresInput.value.trim(),
+        dob: {
+        day: daySelect.value,
+        month: monthSelect.value,
+        year: yearSelect.value
+        }
+    };
 
-            saveBtn.style.display = 'none';
-            editBtn.style.display = 'inline-block';
+    const res = await fetch('http://localhost:3000/api/users/update-profile', {
+        method: 'POST',
+        headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`  // send token in header
+        },
+        body: JSON.stringify(updatedData)
+    });
 
-            alert('Profile updated successfully!');
-        });
-        // Log out
-        logoutBtn.addEventListener('click', () => {
-            // Clear user-related localStorage items
-            localStorage.removeItem('username');
-            localStorage.removeItem('email');
-            localStorage.removeItem('fullName');
-            localStorage.removeItem('userBio');
-            localStorage.removeItem('userGenres');
-            localStorage.removeItem('dobDay');
-            localStorage.removeItem('dobMonth');
-            localStorage.removeItem('dobYear');
+    const data = await res.json();
 
+    if (res.ok) {
+        localStorage.setItem('user', JSON.stringify(data));
+        alert('Profile updated and saved to server!');
 
-            // Redirect to login page
-            window.location.href = 'login.html';
-        });
-        });
+        // Disable inputs again
+        userNameInput.disabled = true;
+        userBioInput.disabled = true;
+        userGenresInput.disabled = true;
+        daySelect.disabled = true;
+        monthSelect.disabled = true;
+        yearSelect.disabled = true;
+
+        saveBtn.style.display = 'none';
+        editBtn.style.display = 'inline-block';
+
+    
+    } else {
+        alert('Failed to update profile!');
+    }
+    });
+
+    // Log out
+    logoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('user');
+        window.location.href = 'login.html';
+    });
+    });
+
 
     </script>
     <footer>

@@ -6,7 +6,11 @@ const router = express.Router();
 
 // Register Route
 router.post('/register', async (req, res) => {
-  const { username, email, password, confirmPassword } = req.body;
+  const { fullName, email, username,  password, confirmPassword } = req.body;
+
+  if (!fullName || !email || !username || !password || !confirmPassword) {
+    return res.status(400).json({ message: 'Please fill in all required fields.' });
+  }
 
   if (password !== confirmPassword) {
     return res.status(400).json({ message: "Passwords don't match!" });
@@ -26,8 +30,9 @@ router.post('/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new User({
-      username,
+      fullName,
       email,
+      username,
       password: hashedPassword,
     });
 
@@ -35,7 +40,7 @@ router.post('/register', async (req, res) => {
 
     res.status(201).json({
       message: 'User registered successfully',
-      user: { username, email },
+      user: { fullName, email, username },
     });
 
   } catch (error) {
@@ -49,7 +54,7 @@ router.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
   try {
-    // Find user by username OR email
+    // Find user by username 
     const user = await User.findOne({
       $or: [{ email: username }, { username: username }]
     });
@@ -70,7 +75,7 @@ router.post('/login', async (req, res) => {
     res.json({
       message: "Login successful",
       token,
-      user: { username: user.username, email: user.email }
+      user: { fullName: user.fullName, email: user.email, username: user.username }
     });
 
   } catch (error) {

@@ -91,7 +91,8 @@
 
             if (response.ok) {
             alert('Login successful!');
-            // Save token if you want: localStorage.setItem('token', data.token);
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
             window.location.href = 'project.html';
             } else {
             alert(data.message || 'Login failed. Please check your credentials.');
