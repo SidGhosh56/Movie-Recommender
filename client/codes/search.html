@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <title>CineVortex – Search Results</title>
+</head>
+
+<body>
+  <div id="root">
+    <!-- HEADER -->
+    <div class="heading">
+      <div class="header-left">
+        <div class="menu-toggle" id="menu-toggle">
+          <span class="material-symbols-outlined">menu</span>
+        </div>
+
+        <h1 class="logo">Cine<span>Vortex</span></h1>
+
+        <div class="home-container">
+          <a href="project.html" class="home-icon" title="Go to Home">
+            <span class="material-symbols-outlined">home</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="search-container">
+        <div class="search">
+          <span class="search-icon material-symbols-outlined">search</span>
+          <input class="search-input" type="search" id="search-input" placeholder="Search">
+        </div>
+      </div>
+
+      <!-- Profile -->
+      <div class="profile"> 
+        <img id="profile-img" src="https://cdn-icons-png.flaticon.com/512/6522/6522516.png">
+        <div id="dropdown" class="dropdown-menu">
+          <ul>
+            <li onclick="location.href='profile.html'">Profile</li>
+            <li onclick="location.href='settings.html'">Settings</li>
+            <li onclick="location.href='login.html'">Login</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="side" id="sidebar">
+      <a href="watchlist.html"><div class="p1">Watchlist</div></a>
+      <hr>
+      <a href="tracker.html"><div class="p1">Tracker</div></a>
+      <hr>
+      <a href="surprise.html"><div class="p1">Surprise Me</div></a>
+      <hr>
+      <a href="community.html"><div class="p1">Community</div></a>
+    </div>
+
+    <!-- DARK OVERLAY -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- MAIN CONTENT -->
+    <div class="container">
+      <div class="profile-box">
+        <h2>Search Results</h2>
+        <p id="search-query-text"></p>
+        <div id="search-results" class="movies-container"></div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+      <p>Contact Us</p>
+    </footer>
+
+    <!-- Script -->
+    <script>
+      // Dummy data — replace this with API call or database content
+      const movies = [
+        { title: "Inception", year: 2010 },
+        { title: "Interstellar", year: 2014 },
+        { title: "The Matrix", year: 1999 },
+        { title: "The Dark Knight", year: 2008 },
+        { title: "Avatar", year: 2009 }
+      ];
+
+      // Get query from URL
+      const params = new URLSearchParams(window.location.search);
+      const query = params.get('q')?.toLowerCase() || '';
+      
+      const input = document.getElementById('search-input');
+      input.value = query;  // <-- Set input value on page load
+
+      document.getElementById('search-query-text').innerText = `Showing results for: "${query}"`;
+
+      const resultsContainer = document.getElementById('search-results');
+      const matched = movies.filter(movie => movie.title.toLowerCase().includes(query));
+
+      if (matched.length === 0) {
+        resultsContainer.innerHTML = '<p class="no-data">No results found :(</p>';
+      } else {
+        matched.forEach(movie => {
+          const card = document.createElement('div');
+          card.className = 'movie-card';
+          card.innerHTML = `
+            <h3>${movie.title}</h3>
+            <p>Year: ${movie.year}</p>
+          `;
+          resultsContainer.appendChild(card);
+        });
+      }
+
+      // Handle search input (enter key to trigger search)
+      /*const input = document.getElementById('search-input');
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          const query = input.value.trim();
+          if (query) {
+            window.location.href = `search.html?q=${encodeURIComponent(query)}`;
+          }
+        }
+      });*/
+    </script>
+  </div>
+</body>
+</html>

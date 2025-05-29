@@ -24,7 +24,7 @@ body {
     position: relative;
     z-index: 10;
     gap: 0; 
-    flex-wrap: nowwrap;
+    flex-wrap: nowrap;
     flex-shrink: 0;
 }
 .header-left {
@@ -166,29 +166,92 @@ hr{
 
 /* Sections */
 .section-1 {
-    background-color: rgb(116, 180, 206);
-    padding: 25px;
-    border-radius: 4px;
-    height: 80%;
+    /*background-color: rgb(116, 180, 206);*/
+    background-color: rgb(48, 47, 47);
+    height: 50%;
     text-align: center;
-    
+    padding-top: 0px;
 }
 
 .section-2,.section-3 {
     background-color: rgb(116, 180, 206);
     padding: 29px;
     border-radius: 4px;
-    height: 30%;
+    height: 15%;
     text-align: center;
    
 }
+.slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0;
+    transition: opacity 0.35s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: rgb(15, 45, 53);
+    pointer-events: none; /* prevent clicks when hidden */
+}
 
+.slide.active {
+  opacity: 1;
+  z-index: 1;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column; /* stacks heading then image row vertically */
+  align-items: center;
+  padding-top: 10px;
+}
+
+/* For single images directly inside a slide */
+.slide > img {
+  width: 60%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.slide-title {
+  font-size: 24px;
+  color: #69e6ea;
+  text-align: center; /* optional, for better alignment */
+  padding-bottom: 10px; 
+  padding-top: 0px;
+  margin-top: 1px;
+  margin-bottom: 8px;
+}
+/* For multiple images inside a row */
+.image-row {
+  display: flex;
+  gap: 100px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  padding-top: 0;       /* Key change */
+  margin-top: 0;
+}
+
+.image-row img {
+  width: 24%;
+  height:fit-content;
+  object-fit: cover;
+  border-radius: 50px;
+  transition: transform 0.3s ease;
+}
+
+.image-row img:hover {
+  transform: scale(1.05);
+}
 footer{
     background-color: #1e0048;
     color:rgb(204, 146, 212);
     text-align: right;
     padding: 2px;
-    height: auto;
+    height: 7%;
     padding-right: 19px;
     flex-shrink: 0;
 }
@@ -265,7 +328,7 @@ footer{
     right: 0;
     bottom: 0;
     opacity: 0;
-    transition: opacity 1s ease-in-out;
+    transition: opacity 2s ease-in-out;
     font-size: 24px;
     color: rgb(15, 45, 53);
     display: flex;
@@ -277,6 +340,7 @@ footer{
   .slide.active {
     opacity: 1;
     z-index: 1;
+    display: block;
   }
   
   .arrow {
@@ -560,8 +624,6 @@ button#surpriseBtn, button#anotherBtn {
     font-size: 24px;
 }
 
-
-
 /*SETTINGS */
 .setting-section {
   margin-bottom: 25px;
@@ -714,3 +776,4 @@ input[type="email"] {
     text-align: center;
   }
 }
+

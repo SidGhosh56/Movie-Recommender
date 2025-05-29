@@ -179,7 +179,6 @@ function renderWatchlistApology(){
 }
 
 
-
 //SETTINGS
 document.getElementById("save-btn").addEventListener("click", () => {
   const email = document.getElementById("email-input").value;
@@ -315,3 +314,5 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
     alert('An error occurred. Please try again later.');
   }
 });
+
+

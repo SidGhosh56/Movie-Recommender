@@ -1,10 +1,10 @@
 {
   "name": "movie-recommender",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "start": "node server/server.js",
-    "dev": "nodemon server/server.js",
+    "dev": "concurrently \"nodemon server/server.js\" \"live-server ../client/codes --open=project.html\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -22,5 +22,9 @@
     "mongodb": "^6.16.0",
     "mongoose": "^8.14.2"
   },
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "live-server": "^1.2.2"
+  }
 }

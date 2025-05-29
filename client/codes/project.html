@@ -32,9 +32,20 @@
             <div class="search-container">
                 <div class="search">
                     <span class="search-icon material-symbols-outlined">search</span>
-                    <input class="search-input" type="search" placeholder="Search">
+                    <input class="search-input" type="search"  id="search-input" placeholder="Search">
                 </div>
             </div>
+            <script>
+            const input = document.getElementById('search-input');
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                const query = input.value.trim();
+                if (query) {
+                    window.location.href = `search.html?q=${encodeURIComponent(query)}`;
+                }
+                }
+            });
+            </script>
 
             <!-- Profile -->
             <div class="profile"> 
@@ -68,9 +79,30 @@
         <div class="container">
             <div class="main-content">
                 <div class="section-1 slider">
-                    <div class="slide active" >Slide 1: Trending Movie</div>
-                    <div class="slide">Slide 2: New Releases</div>
-                    <div class="slide">Slide 3: Recommended</div>
+                    <div class="slide active" >
+                        <h4 class="slide-title">Trending</h4>
+                        <div class="image-row">
+                            <img src="https://img.englishcinemakyiv.com/gvhsMT4MMV_MrmPc8kejNbesyIS9xsxDhMTETlqzcGo/resize:fill:800:450:1:0/gravity:sm/aHR0cHM6Ly9leHBhdGNpbmVtYXByb2QuYmxvYi5jb3JlLndpbmRvd3MubmV0L2ltYWdlcy9hNjdhNzUyZi0wNzAyLTQ3NmYtYjlhOC1hODc5ZjdmMTU0ZjEuanBn.jpg" alt="Movie 1">
+                            <img src="https://img.goodfon.com/original/3840x2160/d/89/balerina-ballerina-mech-poster-eva-makarro-katana-from-the-w.jpg" alt="Movie 2">
+                            <img src="https://interplanetary.tv/wp-content/uploads/2024/12/Superman-2025-landscape-poster-2.webp" alt="Movie 3">
+                        </div>
+                    </div>
+                    <div class="slide">
+                        <h4 class="slide-title">New Releases</h4>
+                        <div class="image-row">
+                            <img src="https://external-preview.redd.it/coming-to-theaters-on-may-23-2025-v0-u8BE1ujskwrrr_PP2JiGl3nWsGY3JxHVbE6CMeKBIfk.jpg?width=640&crop=smart&auto=webp&s=a6d0090866130d5eab782fa2ebd7f7af3dc627f5" alt="Movie 1">
+                            <img src="https://www.showtimenepal.com/storage/uploads/movies/2091-h.jpg" alt="Movie 2">
+                            <img src="https://img.goodfon.com/original/7680x4320/6/3f/karate-kid-legends-2025-movies-black-background-movies.jpg" alt="Movie 3">
+                        </div>
+                    </div>
+                    <div class="slide">
+                        <h4 class="slide-title">Recommended</h4>
+                        <div class="image-row">
+                            <img src="https://3dvf.com/wp-content/uploads/2025/04/thunderbolts.webp" alt="Movie 1">
+                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUPXaZzampYWJ8FKPHN_3Uq8J15VNEOpHzNA&s" alt="Movie 2">
+                            <img src="https://www.filmofilia.com/wp-content/uploads/2025/04/Final-Destination-Bloodlines-1.webp" alt="Movie 3">
+                        </div>
+                    </div>
                     <span class="arrow left" id="prev">&#10094;</span>
                     <span class="arrow right" id="next">&#10095;</span>
                 </div>              
