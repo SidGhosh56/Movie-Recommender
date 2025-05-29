@@ -179,6 +179,7 @@ function renderWatchlistApology(){
 }
 
 
+
 //SETTINGS
 document.getElementById("save-btn").addEventListener("click", () => {
   const email = document.getElementById("email-input").value;

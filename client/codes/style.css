@@ -527,6 +527,41 @@ button#surpriseBtn, button#anotherBtn {
     text-align: center;
 }
 
+/*ADD MOVIES*/
+.search-movies {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 2em auto;
+    gap: 0.5em;
+}
+
+#search-input {
+    padding: 0.5em 1em;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    width: 250px;
+}
+
+#search-btn {
+    background-color: #228BE6;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#search-btn .material-symbols-outlined {
+    color: white;
+    font-size: 24px;
+}
+
+
+
 /*SETTINGS */
 .setting-section {
   margin-bottom: 25px;
