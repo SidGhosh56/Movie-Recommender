@@ -10,7 +10,7 @@ html, body {
 body {
     background-color: rgb(48, 47, 47);
     font-family: Arial, sans-serif;
-    overflow: hidden;
+    overflow-y: auto; 
 }
 
 /* Header Section */
@@ -53,7 +53,6 @@ h1 {
     flex: 1;
     display: flex;
     margin-left: 300px;
-    
 }
 
 
@@ -118,7 +117,7 @@ img {
     display: flex;
     height: 100vh; /* Make the layout full height */
     flex-direction: row;
-    overflow: hidden;
+    overflow-y: auto;
 }
 
 .menu-toggle {
@@ -154,14 +153,14 @@ hr{
 }
 /* Right Section */
 .main-content {
-    flex: 1; /* Take the remaining space */
+    flex: 1 0 auto;  /* Take the remaining space */
     display: flex;
     flex-direction: column;
     gap: 5px; /* Adds space between sections */
     padding: 5px;
     /*background-color: rgb(81, 14, 81);*/
     background: linear-gradient(to right, rgb(48, 47, 47), rgb(48, 47, 47));
-    overflow: auto;
+    overflow-y: auto;
 }
 
 /* Sections */
@@ -247,13 +246,12 @@ hr{
   transform: scale(1.05);
 }
 footer{
-    background-color: #1e0048;
-    color:rgb(204, 146, 212);
-    text-align: right;
-    padding: 2px;
-    height: 7%;
-    padding-right: 19px;
-    flex-shrink: 0;
+  height: 45px;                  /* fixed footer height */
+  background-color: #1e0048;
+  color: rgb(204, 146, 212);
+  text-align: right;
+  padding: 4px 10px;
+  flex-shrink: 0;         
 }
 #root {
   display: flex;
@@ -775,5 +773,72 @@ input[type="email"] {
     flex-direction: column;
     text-align: center;
   }
+}
+
+.s-container{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.movies-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 0px;
+  overflow-y: auto;
+}
+
+#searched-movie .movie-card {
+  background-color: #1e1e1e;
+  padding: 16px;
+  border-radius: 10px;
+  color: #fff;
+  box-shadow: 0 0 8px rgba(0,0,0,0.3);
+  width: 250px;
+  text-align: center;
+}
+
+#recommendation-row {
+  margin-top: 5px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+}
+
+#recommendation-row .rec-movie {
+  background-color: #2a2a2a;
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 0 6px rgba(0,0,0,0.2);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  width: 180px;
+}
+
+#recommendation-row .rec-movie:hover {
+  background-color: #444;
+}
+
+#search-query-text {
+  text-align: center;
+  margin: 6px 0;
+}
+
+.recommend h3{
+  text-align: center;
+  margin: 20px 0;
+}
+
+.profile-box h2{
+  text-align: center;
+  margin-top: 400px;
 }
 

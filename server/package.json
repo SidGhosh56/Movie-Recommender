@@ -4,7 +4,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server/server.js",
-    "dev": "concurrently \"nodemon server/server.js\" \"live-server ../client/codes --open=project.html\"",
+    "dev": "concurrently \"nodemon server/server.js\" \"cross-env FLASK_APP=model_api.py FLASK_ENV=development flask run --port=5001\" \"live-server ../client/codes --open=project.html\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -25,6 +25,7 @@
   "description": "",
   "devDependencies": {
     "concurrently": "^9.1.2",
+    "cross-env": "^7.0.3",
     "live-server": "^1.2.2"
   }
 }

@@ -10,7 +10,7 @@ app = Flask(__name__)
 CORS(app)  # Allow requests from other domains (e.g., frontend or Node.js)
 
 # === LOAD AND PREPARE DATA ===
-df = pd.read_csv("./import/final_1.csv")
+df = pd.read_csv("./import/project.csv")
 df['title_with_year'] = df['title'] + " (" + df['year'].astype(str) + ")"
 df['combined_features'] = df['overview'] + " " + df['genres']
 
@@ -35,6 +35,15 @@ def weighted_rating(row):
 
 df['weighted_rating'] = df.apply(weighted_rating, axis=1)
 df['weighted_rating_norm'] = df['weighted_rating'] / df['weighted_rating'].max()
+
+def get_matching_titles(title):
+    matches = df[df['title'].str.lower() == title.lower()]
+    if matches.empty:
+        return []
+    else:
+        # Return a list of dictionaries with title_with_year and rating for each match
+        return matches[['title_with_year', 'rating', 'poster_url']].drop_duplicates().to_dict(orient='records')
+
 
 def tfidf_hybrid_recommend(title_with_year, alpha=0.6, beta=0.2, gamma=0.2, num_recommend=10, min_rating=7.0):
     if title_with_year not in indices:
@@ -65,7 +74,7 @@ def tfidf_hybrid_recommend(title_with_year, alpha=0.6, beta=0.2, gamma=0.2, num_
     sorted_indices = np.argsort(hybrid_scores)[::-1]
     best_movies = np.array(movie_indices)[sorted_indices]
 
-    recommendations = df[['title_with_year', 'rating']].iloc[best_movies[1:num_recommend+1]].reset_index(drop=True)
+    recommendations = df[['title_with_year', 'rating', 'poster_url']].iloc[best_movies[1:num_recommend+1]].reset_index(drop=True)
     return recommendations.to_dict(orient="records")
 
 
@@ -84,6 +93,42 @@ def recommend():
 
     return jsonify({"recommendations": results})
 
+@app.route("/search", methods=["POST"])
+def search():
+    data = request.get_json()
+    title = data.get("title", "").strip()
+    if not title:
+        return jsonify({"error": "No title provided."}), 400
+
+    matched_movies = get_matching_titles(title)
+    if not matched_movies:
+        return jsonify({"error": "No movies found with that title."}), 404
+
+    return jsonify({"matches": matched_movies})
+
+@app.route("/search_and_recommend", methods=["POST"])
+def search_and_recommend():
+    data = request.get_json()
+    title = data.get("title", "").strip()
+    if not title:
+        return jsonify({"error": "No title provided."}), 400
+
+    matched_movies = get_matching_titles(title)
+    if not matched_movies:
+        return jsonify({"error": "No movies found with that title."}), 404
+
+    results = []
+    for _, movie in matched_movies.iterrows():
+        title_with_year = movie['title_with_year']
+        recs = tfidf_hybrid_recommend(title_with_year)
+        results.append({
+            "title_with_year": title_with_year,
+            "rating": movie['rating'],
+            "poster_url": movie['poster_url'],  # include poster
+            "recommendations": recs
+    })
+
+    return jsonify({"matches": results})
 
 if __name__ == "__main__":
     app.run(port=5001)
