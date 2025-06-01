@@ -57,8 +57,8 @@
         <div class="overlay" id="overlay"></div>
 
         <!--MAIN CONTENT-->
-        <div class="container">
-        <div class="profile-box">
+        <div class="s-container">
+        <div class="w-profile-box">
         <div class="search-page">
 
             <main class="search-movies">
@@ -67,6 +67,17 @@
                     <span class="material-symbols-outlined">search</span>
                 </button>
             </main>
+            <script>
+            const input = document.getElementById('search-input');
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                const query = input.value.trim();
+                if (query) {
+                    window.location.href = `search.html?q=${encodeURIComponent(query)}`;
+                }
+                }
+            });
+            </script>
 
              <section id="search-results" class="movies-container"></section>
         </div>

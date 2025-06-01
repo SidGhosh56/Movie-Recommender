@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1"> 
+	<link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <title> CineVortex </title>
+</head>
+
+<body>
+    <div id="root">
+        <!-- HEADER -->
+        <div class="heading">
+            
+            <div class="header-left">
+                <!-- Menu Icon -->
+            <div class="menu-toggle" id="menu-toggle">
+                <span class="material-symbols-outlined">menu</span>
+            </div>
+
+            <h1 class="logo">Cine<span>Vortex</span></h1>
+
+                <!-- Home Icon -->
+            <div class="home-container">
+            <a href="project.html" class="home-icon" title="Go to Home">
+                <span class="material-symbols-outlined">home</span>
+            </a>
+            </div>
+            </div>
+
+            <!-- Profile -->
+            <div class="profile"> 
+                <img id="profile-img" src="https://cdn-icons-png.flaticon.com/512/6522/6522516.png">
+                <div id="dropdown" class="dropdown-menu">
+                    <ul>
+                        <li onclick="location.href='profile.html'">Profile</li>
+                        <li onclick="location.href='settings.html'">Settings</li>
+                        <li onclick="location.href='login.html'">Login</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- SIDEBAR -->
+        <div class="side" id="sidebar">
+            <a href="watchlist.html"><div class="p1">Watchlist</div></a>
+            <hr>
+            <a href="tracker.html"><div class="p1">Tracker</div></a>
+            <hr>
+            <a href="surprise.html"><div class="p1">Surprise Me</div></a>
+            <hr>
+            <a href="community.html"><div class="p1">Community</div></a>
+
+        </div>
+        
+        <!-- DARK OVERLAY -->
+        <div class="overlay" id="overlay"></div>
+         <!-- MAIN CONTENT -->
+          <div class="s-container">
+          <div class="w-profile-box">
+            <h2>Select Your Favorite Genres</h2>
+            <form id="preferencesForm">
+                <div id="genresContainer">
+                <!-- Genres checkboxes will be rendered here -->
+                </div>
+
+                <h3>Select 3 Favorite Movies</h3>
+                <div id="moviesContainer">
+                <!-- Movies checkboxes will be rendered here -->
+                </div>
+
+                <button type="submit">Save Preferences</button>
+            </form>
+        </div>
+        </div>
+
+  <script>
+    const genres = ['Action', 'Comedy', 'Drama', 'Thriller', 'Horror', 'Romance', 'Science Fiction', 'Fantasy'];
+
+    const genresContainer = document.getElementById('genresContainer');
+    const moviesContainer = document.getElementById('moviesContainer');
+
+    // Render genres as checkboxes
+    genres.forEach(genre => {
+      const label = document.createElement('label');
+      label.innerHTML = `<input type="checkbox" name="genres" value="${genre}" /> ${genre}`;
+      genresContainer.appendChild(label);
+      genresContainer.appendChild(document.createElement('br'));
+    });
+
+    // When genres change, fetch movies from backend for selected genres
+    genresContainer.addEventListener('change', async () => {
+      const selectedGenres = [...document.querySelectorAll('input[name="genres"]:checked')].map(cb => cb.value);
+      if (selectedGenres.length === 0) {
+        moviesContainer.innerHTML = 'Please select at least one genre';
+        return;
+      }
+      // Fetch movies from your backend
+      try {
+        const response = await fetch(`http://localhost:3000/api/movies/by_genre?genres=${encodeURIComponent(selectedGenres.join(','))}`);
+        const data = await response.json();
+
+        if (response.ok) {
+          // Display movie checkboxes, limit to e.g. 20
+          moviesContainer.innerHTML = '';
+          data.movies.slice(0, 20).forEach(movie => {
+            const label = document.createElement('label');
+            label.innerHTML = `<input type="checkbox" name="movies" value="${movie._id}" /> ${movie.title}`;
+            moviesContainer.appendChild(label);
+            moviesContainer.appendChild(document.createElement('br'));
+          });
+        } else {
+          moviesContainer.innerHTML = 'No movies found for selected genres.';
+        }
+      } catch (error) {
+        moviesContainer.innerHTML = 'Error fetching movies.';
+      }
+    });
+
+    document.getElementById('preferencesForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const selectedGenres = [...document.querySelectorAll('input[name="genres"]:checked')].map(cb => cb.value);
+      const selectedMovies = [...document.querySelectorAll('input[name="movies"]:checked')].map(cb => cb.value);
+
+      if (selectedGenres.length === 0) {
+        alert('Please select at least one genre.');
+        return;
+      }
+      if (selectedMovies.length !== 3) {
+        alert('Please select exactly 3 favorite movies.');
+        return;
+      }
+
+      // Get userId and token from localStorage
+      const userId = localStorage.getItem('userId');
+      const token = localStorage.getItem('token');
+      if (!userId || !token) {
+        alert('User not logged in properly.');
+        return;
+      }
+
+      try {
+        const response = await fetch('http://localhost:3000/api/users/preferences', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`},
+          body: JSON.stringify({ userId, favoriteGenres: selectedGenres, favoriteMovies: selectedMovies })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          alert('Preferences saved! Redirecting to home page.');
+          window.location.href = 'project.html';
+        } else {
+          alert(data.message || 'Failed to save preferences.');
+        }
+      } catch (error) {
+        alert('Error saving preferences.');
+      }
+    });
+  </script>
+
+        <!-- FOOTER -->
+        <footer>
+            <p>Contact Us</p>
+        </footer>
+
+        <script src="script.js"></script>
+    </div>
+</body>
+</html>

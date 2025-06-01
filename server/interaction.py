@@ -2,6 +2,9 @@ from flask import Flask, request, jsonify
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from datetime import datetime
+import requests
+
+
 client = MongoClient('mongodb://localhost:27017/')
 db = client['CineVortex']  # Replace with your DB name
 user_interactions = db['interactions']

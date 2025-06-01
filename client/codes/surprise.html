@@ -32,10 +32,20 @@
             <div class="search-container">
                 <div class="search">
                     <span class="search-icon material-symbols-outlined">search</span>
-                    <input class="search-input" type="search" placeholder="Search">
+                    <input class="search-input" type="search"  id="search-input" placeholder="Search">
                 </div>
             </div>
-
+             <script>
+            const input = document.getElementById('search-input');
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                const query = input.value.trim();
+                if (query) {
+                    window.location.href = `search.html?q=${encodeURIComponent(query)}`;
+                }
+                }
+            });
+            </script>
             <!-- Profile -->
             <div class="profile"> 
                 <img id="profile-img" src="https://cdn-icons-png.flaticon.com/512/6522/6522516.png">
@@ -65,8 +75,8 @@
         <div class="overlay" id="overlay"></div>
 
         <!-- MAIN CONTENT -->
-        <div class="container">
-          <div class="profile-box">
+        <div class="s-container">
+          <div class="w-profile-box">
             <h2>Surprise Me</h2>
             <!-- Additional profile content can go here -->
             <button id="surpriseBtn">Click Here!</button>

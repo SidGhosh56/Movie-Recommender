@@ -265,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-document.getElementById('register-form').addEventListener('submit', async (e) => {
+/*document.getElementById('register-form').addEventListener('submit', async (e) => {
   e.preventDefault();  // Prevent default form submission
 
   // Get values from the form inputs
@@ -304,7 +304,7 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
     if (response.ok) {
       // Registration successful, show a message or redirect to login
       alert('User registered successfully!');
-      window.location.href = 'login.html'; // Redirect to login page
+      window.location.href = 'prefer.html'; // Redirect to login page
     } else {
       // Show any error message from the backend
       alert(data.message || 'Registration failed!');
@@ -313,6 +313,46 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
     console.error('Error during registration:', error);
     alert('An error occurred. Please try again later.');
   }
-});
+});*/
 
+
+document.addEventListener('click', async (e) => {
+  if (e.target.classList.contains('add-watchlist-btn')) {
+    const button = e.target;
+    const id = button.dataset.id;
+    const title = button.dataset.title;
+    const poster_url = button.dataset.poster;
+    const rating = button.dataset.rating;
+
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      alert("Please log in to add to your watchlist.");
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/watchlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ id, title, poster_url, rating })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        alert('Added to watchlist!');
+        button.disabled = true;
+        button.textContent = 'Added';
+      
+      } else {
+        alert(data.message || 'Failed to add to watchlist.');
+      }
+    } catch (err) {
+      console.error('Error adding to watchlist:', err);
+    }
+  }
+});
 

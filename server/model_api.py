@@ -74,7 +74,7 @@ def tfidf_hybrid_recommend(title_with_year, alpha=0.6, beta=0.2, gamma=0.2, num_
     sorted_indices = np.argsort(hybrid_scores)[::-1]
     best_movies = np.array(movie_indices)[sorted_indices]
 
-    recommendations = df[['title_with_year', 'rating', 'poster_url']].iloc[best_movies[1:num_recommend+1]].reset_index(drop=True)
+    recommendations = df[['id', 'title_with_year', 'rating', 'poster_url']].iloc[best_movies[1:num_recommend+1]].reset_index(drop=True)
     return recommendations.to_dict(orient="records")
 
 
@@ -116,9 +116,9 @@ def search_and_recommend():
     matched_movies = get_matching_titles(title)
     if not matched_movies:
         return jsonify({"error": "No movies found with that title."}), 404
-
+    
     results = []
-    for _, movie in matched_movies.iterrows():
+    for movie in matched_movies:
         title_with_year = movie['title_with_year']
         recs = tfidf_hybrid_recommend(title_with_year)
         results.append({

@@ -28,13 +28,7 @@
             </a>
             </div>
             </div>
-            <!-- Search Bar -->
-            <div class="search-container">
-                <div class="search">
-                    <span class="search-icon material-symbols-outlined">search</span>
-                    <input class="search-input" type="search" placeholder="Search">
-                </div>
-            </div>
+            
 
             <!-- Profile -->
             <div class="profile"> 
@@ -65,15 +59,15 @@
         <div class="overlay" id="overlay"></div>
 
         <!-- MAIN CONTENT -->
-        <div class="container">
-          <div class="profile-box">
+        <div class="s-container">
+          <div class="w-profile-box">
                 <h2>My Watchlist</h2>
                 <section class="movies-container" id="watchlist-container">
                 <!-- empty watchlist  -->
                  <div class="body-wrapper">
                     <h3 class="no-data">Your watchlist is looking a little empty :(</h3>
                     <a href="addmovies.html" style="text-decoration: none;"><img id="plus-img" src="https://img.icons8.com/m_sharp/512/228BE6/plus--v2.png" style="width: 20px; height: 20px;">    
-                        Let's add some movies!</a>
+                        Let's add some movies!
                     </a> 
 
                 </div> 
@@ -82,7 +76,89 @@
             </section>
           </div>
         </div>
+        <script>
+        async function loadWatchlist() {
+            const token = localStorage.getItem('token');
+            const container = document.getElementById('watchlist-container');
+            container.innerHTML = ''; // Clear existing content
 
+            if (!token) {
+                container.innerHTML = `
+                <div class="body-wrapper">
+                    <h3 class="no-data">Please log in to see your watchlist.</h3>
+                </div>`;
+                return;
+            }
+
+            try {
+                const res = await fetch('http://localhost:3000/api/watchlist', {
+                headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!res.ok) {
+                throw new Error('Failed to fetch watchlist');
+                }
+
+                const watchlist = await res.json();
+
+                if (watchlist.length === 0) {
+                container.innerHTML = `
+                    <div class="body-wrapper">
+                    <h3 class="no-data">Your watchlist is looking a little empty :(</h3>
+                    <a href="addmovies.html" style="text-decoration: none;">
+                        <img id="plus-img" src="https://img.icons8.com/m_sharp/512/228BE6/plus--v2.png" style="width: 20px; height: 20px;">    
+                        Let's add some movies!
+                    </a> 
+                    </div>`;
+                return;
+                }
+
+                // Render movies in watchlist
+                watchlist.forEach(movie => {
+                const movieDiv = document.createElement('div');
+                movieDiv.classList.add('movie-card');
+                movieDiv.innerHTML = `
+                    <img src="${movie.poster_url || 'placeholder.jpg'}" alt="${movie.title}" />
+                    <h4>${movie.title}</h4>
+                    <p>Rating: ${movie.rating || 'N/A'}</p>
+                    <button class="remove-btn" data-id="${movie._id}">Remove</button>
+                `;
+                container.appendChild(movieDiv);
+
+                const removeBtn = movieDiv.querySelector('.remove-btn');
+                removeBtn.addEventListener('click', async () => {
+                try {
+                    const res = await fetch(`http://localhost:3000/api/watchlist/${movie._id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+
+                    if (!res.ok) {
+                        throw new Error('Failed to remove movie');
+                    }
+
+                    movieDiv.remove();
+                    } catch (err) {
+                        console.error(err);
+                        alert('Error removing movie. Try again.');
+                    }
+                });
+            });
+        
+
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<p class="error">Error loading watchlist. Please try again later.</p>`;
+            }
+        }
+
+        // Run on page load
+        window.addEventListener('DOMContentLoaded', loadWatchlist);
+
+        
+        </script>
 
         <!-- FOOTER -->
         <footer>

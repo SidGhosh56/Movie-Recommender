@@ -28,12 +28,12 @@
 
       <!-- Search Bar -->
       <div class="search-container">
-        <div class="search">
-          <span class="search-icon material-symbols-outlined">search</span>
-          <input class="search-input" type="search" id="search-input" placeholder="Search">
-        </div>
-      </div>
-
+                <div class="search">
+                    <span class="search-icon material-symbols-outlined">search</span>
+                    <input class="search-input" type="search"  id="search-input" placeholder="Search">
+                </div>
+            </div>
+      
       <!-- Profile -->
       <div class="profile"> 
         <img id="profile-img" src="https://cdn-icons-png.flaticon.com/512/6522/6522516.png">
@@ -62,8 +62,8 @@
     <div class="overlay" id="overlay"></div>
 
    <!-- MAIN CONTENT WRAPPER -->
-    <div class="s-container">
-  <div class="profile-box">
+  <div class="s-container">
+    <div class="s-profile-box">
     <h2>Search Results</h2>
     <p id="search-query-text"></p>
 
@@ -75,8 +75,8 @@
     <h3>Recommended Movies</h3>
     <div id="recommendation-row" class="movies-container recommendations-row"></div>
     </div>
+    </div>
   </div>
-</div>
 
     <!-- FOOTER -->
     <footer>
@@ -99,6 +99,7 @@ const recommendationRow = document.getElementById('recommendation-row');
 
 searchedMovieContainer.innerHTML = '';
 recommendationRow.innerHTML = '';
+let searchResults = [];
 
 if (!query) {
   searchQueryText.innerText = 'Please enter a movie title to search.';
@@ -107,7 +108,7 @@ if (!query) {
 } else {
   searchQueryText.innerText = `Showing results for: "${query}"`;
   const userId = localStorage.getItem("userId");  // Store this during login
-
+  
 // Log search interaction
 if (userId) {
   fetch('http://localhost:5001/api/log_interaction', {
@@ -145,6 +146,7 @@ if (userId) {
       searchedMovieContainer.innerHTML = '<p class="no-data">No results found :(<br>Try a different keyword or <a href="project.html">return to home</a>.</p>';
       return;
     }
+    searchResults = data.matches;
 
     // Append searched movies on top
     data.matches.forEach(movie => {
@@ -156,6 +158,15 @@ if (userId) {
         <img src="${poster}" alt="${movie.title_with_year}" style="width:100%; border-radius:8px; margin-bottom:10px;">
         <h3>${movie.title_with_year}</h3>
         <p>Rating: ${movie.rating.toFixed(1)}</p>
+        <button 
+        class="add-watchlist-btn" 
+        data-id="${movie._id}" 
+        data-title="${movie.title_with_year}" 
+        data-poster="${poster}" 
+        data-rating="${movie.rating}">
+        Add to Watchlist
+      </button>
+
       `;
 
       searchedMovieContainer.appendChild(movieCard);
@@ -170,6 +181,8 @@ if (userId) {
             <img src="${recPoster}" alt="${rec.title_with_year}" style="width:100%; border-radius:6px; margin-bottom:8px;">
             <h4>${rec.title_with_year}</h4>
             <p>Rating: ${rec.rating.toFixed(1)}</p>
+            <button class="add-watchlist-btn" data-id="${rec.id}">Add to Watchlist</button>
+
           `;
           recommendationRow.appendChild(recMovie);
         });
@@ -182,8 +195,56 @@ if (userId) {
   });
 }
 
+async function addToWatchlist(movie) {
+  const token = localStorage.getItem('token'); // JWT stored after login
+
+  if (!token) {
+    alert("Please log in to add to your watchlist.");
+    return;
+  }
+
+  try {
+    const res = await fetch('http://localhost:3000/api/watchlist', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,// Include JWT here
+        'Cache-Control': 'no-cache'  
+      },
+      body: JSON.stringify({
+        id: movie._id,               // Your unique movie id attribute
+        title: movie.title_with_year,
+        poster_url: movie.poster_url,
+        rating: movie.rating
+      })
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      alert('Added to watchlist!');
+      loadWatchlist();
+    } else {
+      alert(data.message || 'Failed to add to watchlist.');
+    }
+  } catch (err) {
+    console.error('Error adding to watchlist:', err);
+  }
+}
+
+document.getElementById('searched-movie').addEventListener('click', async (e) => {
+  if (e.target.classList.contains('add-watchlist-btn')) {
+    const id = e.target.dataset.id;
+    const movie = searchResults.find(m => String(m._id) === id);
+    if (!movie) {
+      alert('Movie data not found.');
+      return;
+    }
+
+    await addToWatchlist(movie);
+  }
+});
+
       // Handle search input (enter key to trigger search)
-      /*const input = document.getElementById('search-input');
       input.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
           const query = input.value.trim();
@@ -191,7 +252,7 @@ if (userId) {
             window.location.href = `search.html?q=${encodeURIComponent(query)}`;
           }
         }
-      });*/
+      });
     </script>
   </div>
   <script src="script.js"></script>

@@ -7,7 +7,9 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
 
   bio: { type: String, default: '' },
-  genres: { type: [String], default: '' }, 
+  genres: { type: [String], default: '' },
+  
+  favoriteMovies: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Movie' }],
 
   dob: {
     day: { type: Number, default: null },
@@ -15,7 +17,8 @@ const userSchema = new mongoose.Schema({
     year: { type: Number, default: null }
   },
 
-  watchedMovies: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Movie' }]
+  watchedMovies: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Movie' }],
+  watchlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Movie' }]
 });
 
 module.exports = mongoose.model('User', userSchema);

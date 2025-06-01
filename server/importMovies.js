@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const csv = require("csvtojson");
 require("dotenv").config();
-const Movie = require("./models/Movie"); // you'll need to create this model
+const Movie = require("./models/Movie"); 
 
 const connectDB = async () => {
     try {

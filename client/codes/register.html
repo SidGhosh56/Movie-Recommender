@@ -98,6 +98,14 @@ document.getElementById('registerBtn').addEventListener('click', async () => {
     return;
   }
 
+  // Prepare the data to be sent to the server
+  const userData = {
+    username,
+    email,
+    password,
+    confirmPassword
+  };
+  
   try {
     const response = await fetch('http://localhost:3000/api/auth/register', {
     method: 'POST',
@@ -108,13 +116,22 @@ document.getElementById('registerBtn').addEventListener('click', async () => {
     const data = await response.json();
 
     if (response.ok) {
+      const { token } = data; // Extract token from response
+
+    if (!token) {
+      alert('No token received, cannot authenticate.');
+      return;
+    }
+      // Save token in localStorage for auth on later pages
+      localStorage.setItem('token', token);
       // Save to localStorage
       localStorage.setItem('fullName', fullName);
       localStorage.setItem('username', username);
       localStorage.setItem('email', email);
 
       alert('Registration successful!');
-      window.location.href = 'login.html';
+      //window.location.href = 'login.html';
+      window.location.href = 'prefer.html';
     } else {
       alert(data.message || 'Registration failed.');
     }

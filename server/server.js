@@ -8,6 +8,7 @@ const axios = require('axios');
 const recommendRoute = require('./routes/recommend');
 const authRoutes = require('./routes/authRoutes'); // Import auth routes
 const userRoutes = require('./routes/userRoutes');
+const watchlistRoutes = require('./routes/watchlistRoutes'); 
 
 const app = express();
 connectDB(); // ✅ Connect to DB
@@ -50,6 +51,8 @@ app.get("/test-db", async (req, res) => {
 
 app.use('/api/recommend', recommendRoute);
 app.use('/api/auth', authRoutes); // Add auth routes
+
+app.use('/api/watchlist', watchlistRoutes);
 
 const PORT = process.env.PORT || 3000;
 

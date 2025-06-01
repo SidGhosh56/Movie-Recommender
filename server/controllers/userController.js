@@ -54,3 +54,32 @@ exports.removeWatchedMovie = async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
+
+exports.savePreferences = async (req, res) => {
+  const { favoriteGenres, favoriteMovies } = req.body;
+  const userId = req.user.id;
+
+  if (!userId || !favoriteGenres || !favoriteMovies) {
+    return res.status(400).json({ message: 'Missing required data' });
+  }
+
+  try {
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        genres: favoriteGenres,
+        favoriteMovies: favoriteMovies
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json({ message: 'Preferences saved successfully', user: updatedUser });
+  } catch (error) {
+    console.error('Error saving preferences:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};

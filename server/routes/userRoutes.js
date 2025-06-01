@@ -9,4 +9,6 @@ router.post('/watched', auth, userController.addWatchedMovie);
 
 router.delete('/watched/:movieId', auth, userController.removeWatchedMovie);
 
+router.post('/preferences', auth, userController.savePreferences);
+
 module.exports = router;
