@@ -159,18 +159,30 @@
     }
 
     // Now load profile AFTER dropdowns are ready
-    function loadProfile() {
-        const user = JSON.parse(localStorage.getItem('user'));
+    async function loadProfile() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        alert('Please log in first.');
+        window.location.href = 'login.html';
+        return;
+    }
 
-        if (!user) {
-            alert('Please log in first.');
-            window.location.href = 'login.html';
-            return;
+    try {
+        const res = await fetch('http://localhost:3000/api/users/me', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!res.ok) {
+            throw new Error('Failed to fetch user profile');
         }
-        
-        profileNameDisplay.textContent = user.username;
-        profileEmailDisplay.textContent = user.email;
 
+        const user = await res.json();
+        localStorage.setItem('user', JSON.stringify(user));  // keep it synced
+
+        profileNameDisplay.textContent = user.username || '';
+        profileEmailDisplay.textContent = user.email || '';
         userNameInput.value = user.fullName || '';
         userBioInput.value = user.bio || '';
         userGenresInput.value = user.genres || '';
@@ -181,13 +193,19 @@
             yearSelect.value = user.dob.year || '';
         }
 
+        // Disable all fields by default
         userNameInput.disabled = true;
         userBioInput.disabled = true;
         userGenresInput.disabled = true;
         daySelect.disabled = true;
         monthSelect.disabled = true;
         yearSelect.disabled = true;
+
+    } catch (err) {
+        console.error(err);
+        alert('Could not load profile data.');
     }
+}
 
     loadProfile();
 
@@ -211,14 +229,17 @@
     const updatedData = {
         fullName: userNameInput.value.trim(),
         bio: userBioInput.value.trim(),
-        genres: userGenresInput.value.trim(),
+        // Here, split genres string by commas into an array, trimming spaces:
+        genres: userGenresInput.value
+            ? userGenresInput.value.split(',').map(g => g.trim())
+            : [],
         dob: {
         day: daySelect.value,
         month: monthSelect.value,
         year: yearSelect.value
         }
     };
-
+    try{
     const res = await fetch('http://localhost:3000/api/users/update-profile', {
         method: 'POST',
         headers: { 
@@ -249,7 +270,11 @@
     } else {
         alert('Failed to update profile!');
     }
-    });
+    }catch (error) {
+    console.error('Update profile error:', error);
+    alert('An error occurred while updating profile.');
+  }
+});
 
     // Log out
     logoutBtn.addEventListener('click', () => {

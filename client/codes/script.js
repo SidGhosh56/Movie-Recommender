@@ -75,14 +75,31 @@ sidebar.addEventListener("click", (e) => {
 //SURPRISE ME
 const surpriseBtn = document.getElementById("surpriseBtn");
 const anotherBtn = document.getElementById("anotherBtn");
-const movieCard = document.getElementById("movie-card");
+const movieCard = document.getElementById("s-movie-card");
 
 surpriseBtn.addEventListener("click", fetchRandomMovie);
 anotherBtn.addEventListener("click", fetchRandomMovie);
 
 async function fetchRandomMovie() {
-    try {
-        const res = await fetch("http://localhost:3000/api/movies/random");
+      const token = localStorage.getItem("token");  // check if user is logged in
+      let url = "";
+
+      if (token) {
+          // User is logged in → personalized surprise
+          url = "http://localhost:3000/api/movies/surprise";
+      } else {
+          // User is not logged in → generic random movie
+          url = "http://localhost:3000/api/movies/random";
+      }
+
+      try {
+        const res = await fetch(url, {
+            headers: token ? { 'Authorization': `Bearer ${token}` } : {}  // send token if logged in
+        });
+
+        if (!res.ok) {
+            throw new Error("Failed to fetch movie.");
+        }
         const movie = await res.json();
 
         document.getElementById("movie-poster").src = movie.poster_url;
@@ -93,91 +110,10 @@ async function fetchRandomMovie() {
         movieCard.style.display = "block";
         document.getElementById("surpriseBtn").style.display = "none";
         
-    } catch (err) {
-        alert("Failed to fetch movie. Is the backend running?");
-    }
-}
-
-
-
-//WATCHLIST
-let watchlistHtml = ''
-let watchlistArr = JSON.parse(localStorage.getItem('watchlist') || "[]")
-
-render()
-
-document.addEventListener('click', (e)=>{
-    if(e.target.dataset.id){
-        console.log(e.target.dataset.id)
-        watchlistArr = watchlistArr.filter(movie => movie.imdbID !== e.target.dataset.id)
-        console.log(watchlistArr)
-        localStorage.setItem('watchlist', JSON.stringify(watchlistArr))
-        render()
-    }
-
-})
-
-function updateWatchlistHtml(movie){
-    watchlistHtml += `
-                    <div class="movie">
-                        <div class="movie-poster">
-                            <img src=${movie.Poster}  alt="movie-poster"> 
-                        </div>
-                        <div class="movie-body">
-                            <div class="movie-data">
-                                <h2 class="movie-title">${movie.Title}</h2>
-                                <p class="movie-rating">⭐${movie.imdbRating}</p>
-                            </div>
-                            <div class="movie-details">
-                                <p class="movie-runtime">${movie.Runtime}</p>
-                                <p class="movie-genres">${movie.Genre}</p>
-                                <button class="add-remove-btn" data-id=${movie.imdbID}>
-                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="https://www.w3.org/2000/svg">
-                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M8 16C12.4183 16 16 12.4183 16 8C16 3.58172 12.4183 0 8 0C3.58172 0 0 3.58172 0 8C0 12.4183 3.58172 16 8 16ZM5 7C4.44772 7 4 7.44772 4 8C4 8.55228 4.44772 9 5 9H11C11.5523 9 12 8.55229 12 8C12 7.44772 11.5523 7 11 7H5Z" fill="white"/>
-                                    </svg>
-                                    Remove
-                                </button>
-                            </div>
-                            <p class="movie-description">
-                                ${movie.Plot}
-                            </p>
-                        </div>
-                    </div>
-                    <hr>
-    
-     `
-}
-
-function render(){
-    watchlistHtml = '';
-    if(watchlistArr.length){
-        watchlistArr.forEach(movie => {
-            updateWatchlistHtml(movie);
-        });
-        renderWatchlist();
-    } else {
-        renderWatchlistApology();
-    }
-}
-
-
-function renderWatchlist(){
-    document.getElementById('watchlist-container').innerHTML = watchlistHtml
-}
-
-function renderWatchlistApology(){
-    document.getElementById('watchlist-container').innerHTML = `
-                <div class="body-wrapper">
-                    <h2 class="no-data">Your watchlist is looking a little empty...</h2>
-                    <a href="project.html" class="page-nav" style="text-decoration: none; display: flex; align-items: center; gap: 8px;">
-                        <img id="plus-img" src="https://img.icons8.com/m_sharp/512/228BE6/plus--v2.png" style="width: 20px; height: 20px;">    
-                        Let's add some movies!
-                    </a>
-
-                </div>
-    `
-}
-
+      } catch (err) {
+          alert("Failed to fetch movie. Is the backend running?");
+      }
+  }
 
 //SETTINGS
 document.getElementById("save-btn").addEventListener("click", () => {
@@ -315,44 +251,44 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });*/
 
-
-document.addEventListener('click', async (e) => {
-  if (e.target.classList.contains('add-watchlist-btn')) {
-    const button = e.target;
-    const id = button.dataset.id;
-    const title = button.dataset.title;
-    const poster_url = button.dataset.poster;
-    const rating = button.dataset.rating;
-
-    const token = localStorage.getItem('token');
-
-    if (!token) {
-      alert("Please log in to add to your watchlist.");
-      return;
-    }
-
+async function loadWatchedMovies() {
+    const container = document.getElementById('watched-movies-list');
     try {
-      const res = await fetch('/api/watchlist', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ id, title, poster_url, rating })
-      });
+        const response = await fetch('http://localhost:3000/api/users/tracker', {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
+            }
+        });
 
-      const data = await res.json();
-      if (res.ok) {
-        alert('Added to watchlist!');
-        button.disabled = true;
-        button.textContent = 'Added';
-      
-      } else {
-        alert(data.message || 'Failed to add to watchlist.');
-      }
+        if (!response.ok) throw new Error('Failed to fetch watched movies');
+
+        const data = await response.json();
+
+        if (!data.watchedMovies || data.watchedMovies.length === 0) {
+            container.innerHTML = '<p class="no-data">You haven\'t tracked any movies yet. Start watching to see your stats!</p>';
+            return;
+        }
+
+        container.innerHTML = '';
+        data.watchedMovies.forEach(item => {
+            const movieItem = document.createElement('div');
+            movieItem.classList.add('movie-item');
+            movieItem.innerHTML = `
+                <img src="${item.poster_url}" alt="${item.title}" style="width:150px; height:auto; border-radius:10px;" />
+                <h4>${item.title}</h4>
+                <p>Watched on: ${new Date(item.watchedAt).toLocaleDateString()}</p>
+                <hr>
+            `;
+            container.appendChild(movieItem);
+        });
+
     } catch (err) {
-      console.error('Error adding to watchlist:', err);
+        console.error(err);
+        container.innerHTML = '<p class="no-data">Failed to load watched movies.</p>';
     }
-  }
-});
+}
+
+// Load the watched movies when the page loads
+document.addEventListener('DOMContentLoaded', loadWatchedMovies);
 

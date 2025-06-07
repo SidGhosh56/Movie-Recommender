@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
 
   bio: { type: String, default: '' },
-  genres: { type: [String], default: '' },
+  genres: { type: [String], default: [] },
   
   favoriteMovies: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Movie' }],
 
@@ -17,7 +17,10 @@ const userSchema = new mongoose.Schema({
     year: { type: Number, default: null }
   },
 
-  watchedMovies: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Movie' }],
+  watchedMovies: [{ 
+                    movieId: { type: mongoose.Schema.Types.ObjectId, ref: 'Movie' },
+                    watchedAt: { type: Date, default: Date.now }
+                  }],
   watchlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Movie' }]
 });
 

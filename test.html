@@ -1,19 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Search Icon Test</title>
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-  <style>
-    .material-symbols-outlined {
-      font-family: 'Material Symbols Outlined';
-      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-      font-size: 32px;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dropdown Test</title>
+<style>
+  .add-menu {
+    display: none;
+    border: 1px solid #ccc;
+    background: white;
+    padding: 5px;
+    width: 150px;
+    position: absolute;
+  }
+  .add-menu.visible {
+    display: block;
+  }
+  .add-btn {
+    cursor: pointer;
+  }
+</style>
 </head>
-<body style="background: #222; color: white; font-family: sans-serif; padding: 20px;">
-  <p>Search Icon: <span class="material-symbols-outlined">search</span></p>
+<body>
+
+<div style="position: relative; margin: 50px;">
+  <button class="add-btn"> + </button>
+  <div class="add-menu">
+    <div class="add-option">Add to Watchlist</div>
+    <div class="add-option">Add to Watched</div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('click', function(event) {
+    // Close menus if clicked outside button/menu
+    if (!event.target.closest('.add-btn') && !event.target.closest('.add-menu')) {
+      document.querySelectorAll('.add-menu.visible').forEach(menu => {
+        menu.classList.remove('visible');
+      });
+    }
+  });
+
+  document.querySelectorAll('.add-btn').forEach(button => {
+    button.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const menu = this.nextElementSibling;
+      if (menu) {
+        menu.classList.toggle('visible');
+      }
+    });
+  });
+
+  document.querySelectorAll('.add-menu').forEach(menu => {
+    menu.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (e.target.classList.contains('add-option')) {
+        alert(`Clicked on option: ${e.target.innerText}`);
+        menu.classList.remove('visible');
+      }
+    });
+  });
+</script>
+
 </body>
 </html>

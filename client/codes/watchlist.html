@@ -60,9 +60,9 @@
 
         <!-- MAIN CONTENT -->
         <div class="s-container">
-          <div class="w-profile-box">
+          <div class="wt-profile-box">
                 <h2>My Watchlist</h2>
-                <section class="movies-container" id="watchlist-container">
+                <section class="w-movies-container" id="watchlist-container">
                 <!-- empty watchlist  -->
                  <div class="body-wrapper">
                     <h3 class="no-data">Your watchlist is looking a little empty :(</h3>
@@ -75,8 +75,51 @@
                  
             </section>
           </div>
+          <button id="add-more-btn" class="floating-add-btn" onclick="window.location.href='addmovies.html'">
+            + Add More Movies
+        </button>
         </div>
         <script>
+        document.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('add-watchlist-btn')) {
+            const button = e.target;
+            const id = button.dataset._id;
+            const title = button.dataset.title;
+            const poster_url = button.dataset.poster;
+            const rating = button.dataset.rating;
+
+            const token = localStorage.getItem('token');
+
+            if (!token) {
+            alert("Please log in to add to your watchlist.");
+            return;
+            }
+
+            try {
+            const res = await fetch('http://localhost:3000/api/watchlist', {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ _id, title, poster_url, rating })
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                alert('Added to watchlist!');
+                button.disabled = true;
+                button.textContent = 'Added';
+            
+            } else {
+                alert(data.message || 'Failed to add to watchlist.');
+            }
+            } catch (err) {
+            console.error('Error adding to watchlist:', err);
+            }
+        }
+        });
+        
         async function loadWatchlist() {
             const token = localStorage.getItem('token');
             const container = document.getElementById('watchlist-container');
@@ -110,6 +153,7 @@
                         Let's add some movies!
                     </a> 
                     </div>`;
+                addMoreBtn.style.display = 'none'; // hide button when empty
                 return;
                 }
 
@@ -133,13 +177,14 @@
                         headers: {
                             'Authorization': `Bearer ${token}`
                         }
-                    });
+                });
 
                     if (!res.ok) {
                         throw new Error('Failed to remove movie');
                     }
 
                     movieDiv.remove();
+                    checkWatchlistButtonVisibility();
                     } catch (err) {
                         console.error(err);
                         alert('Error removing movie. Try again.');
@@ -147,17 +192,28 @@
                 });
             });
         
+            checkWatchlistButtonVisibility()
 
             } catch (err) {
                 console.error(err);
                 container.innerHTML = `<p class="error">Error loading watchlist. Please try again later.</p>`;
             }
         }
+        const addMoreBtn = document.getElementById('add-more-btn');
+
+        function checkWatchlistButtonVisibility() {
+        const watchlistItems = document.querySelectorAll('.movie-card'); // or your actual movie card class
+        if (watchlistItems.length > 0) {
+            addMoreBtn.style.display = 'block';
+        } else {
+            addMoreBtn.style.display = 'none';
+        }
+        }
 
         // Run on page load
         window.addEventListener('DOMContentLoaded', loadWatchlist);
+       
 
-        
         </script>
 
         <!-- FOOTER -->

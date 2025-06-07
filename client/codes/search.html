@@ -77,7 +77,7 @@
     </div>
     </div>
   </div>
-
+  
     <!-- FOOTER -->
     <footer>
       <p>Contact Us</p>
@@ -155,17 +155,19 @@ if (userId) {
 
       const poster = movie.poster_url || 'default_poster.jpg';
       movieCard.innerHTML = `
+      <a href="movie.html?id=${movie.id}">
         <img src="${poster}" alt="${movie.title_with_year}" style="width:100%; border-radius:8px; margin-bottom:10px;">
         <h3>${movie.title_with_year}</h3>
         <p>Rating: ${movie.rating.toFixed(1)}</p>
+        </a>
         <button 
         class="add-watchlist-btn" 
-        data-id="${movie._id}" 
+        data-id="${movie.id}" 
         data-title="${movie.title_with_year}" 
-        data-poster="${poster}" 
+        data-poster="${movie.poster}" 
         data-rating="${movie.rating}">
         Add to Watchlist
-      </button>
+        </button>
 
       `;
 
@@ -178,13 +180,20 @@ if (userId) {
           recMovie.className = 'rec-movie';
           const recPoster = rec.poster_url || 'default_poster.jpg';
           recMovie.innerHTML = `
+          <a href="movie.html?id=${rec.id}">
             <img src="${recPoster}" alt="${rec.title_with_year}" style="width:100%; border-radius:6px; margin-bottom:8px;">
             <h4>${rec.title_with_year}</h4>
             <p>Rating: ${rec.rating.toFixed(1)}</p>
+            </a>
             <button class="add-watchlist-btn" data-id="${rec.id}">Add to Watchlist</button>
-
           `;
           recommendationRow.appendChild(recMovie);
+          searchResults.push({
+      id: rec.id,
+      title_with_year: rec.title_with_year,
+      poster_url: rec.poster_url,
+      rating: rec.rating
+    });
         });
       }
     });
@@ -212,7 +221,7 @@ async function addToWatchlist(movie) {
         'Cache-Control': 'no-cache'  
       },
       body: JSON.stringify({
-        id: movie._id,               // Your unique movie id attribute
+        id: movie.id,               // Your unique movie id attribute
         title: movie.title_with_year,
         poster_url: movie.poster_url,
         rating: movie.rating
@@ -231,10 +240,10 @@ async function addToWatchlist(movie) {
   }
 }
 
-document.getElementById('searched-movie').addEventListener('click', async (e) => {
+document.addEventListener('click', async (e) => {
   if (e.target.classList.contains('add-watchlist-btn')) {
     const id = e.target.dataset.id;
-    const movie = searchResults.find(m => String(m._id) === id);
+    const movie = searchResults.find(m => String(m.id) === id);
     if (!movie) {
       alert('Movie data not found.');
       return;

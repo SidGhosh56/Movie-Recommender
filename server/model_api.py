@@ -11,6 +11,7 @@ CORS(app)  # Allow requests from other domains (e.g., frontend or Node.js)
 
 # === LOAD AND PREPARE DATA ===
 df = pd.read_csv("./import/project.csv")
+print(df.columns)
 df['title_with_year'] = df['title'] + " (" + df['year'].astype(str) + ")"
 df['combined_features'] = df['overview'] + " " + df['genres']
 
@@ -42,7 +43,7 @@ def get_matching_titles(title):
         return []
     else:
         # Return a list of dictionaries with title_with_year and rating for each match
-        return matches[['title_with_year', 'rating', 'poster_url']].drop_duplicates().to_dict(orient='records')
+        return matches[['id','title_with_year', 'rating', 'poster_url']].drop_duplicates().to_dict(orient='records')
 
 
 def tfidf_hybrid_recommend(title_with_year, alpha=0.6, beta=0.2, gamma=0.2, num_recommend=10, min_rating=7.0):
@@ -122,6 +123,7 @@ def search_and_recommend():
         title_with_year = movie['title_with_year']
         recs = tfidf_hybrid_recommend(title_with_year)
         results.append({
+            "id": str(movie['id']),
             "title_with_year": title_with_year,
             "rating": movie['rating'],
             "poster_url": movie['poster_url'],  # include poster

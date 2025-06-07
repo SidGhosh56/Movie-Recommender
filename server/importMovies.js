@@ -11,7 +11,18 @@ const connectDB = async () => {
         });
         console.log("MongoDB connected ✅");
 
-        const movies = await csv().fromFile("./import/project.csv");
+        let movies = await csv().fromFile("./import/project.csv");
+
+        // Transform genres from string to array for each movie
+        movies = movies.map(movie => {
+            // Check if genres field exists and is a string
+            if (movie.genres && typeof movie.genres === 'string') {
+                movie.genres = movie.genres.split(',').map(g => g.trim());
+            } else {
+                movie.genres = []; // default empty array if missing
+            }
+            return movie;
+        });
 
         await Movie.insertMany(movies);
         console.log("Movies imported 🎬");

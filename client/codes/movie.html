@@ -77,21 +77,57 @@
         <!-- MAIN CONTENT -->
         <div class="s-container">
           <div class="w-profile-box">
-            <h2>Surprise Me</h2>
-            <!-- Additional profile content can go here -->
-            <button id="surpriseBtn">Click Here!</button>
-
-            <div id="s-movie-card" class="s-movie-card" style="display:none;">
-                <img id="movie-poster" src="" alt="Movie Poster">
-                <h3 id="movie-title"></h3>
-                <p><strong>Genre:</strong> <span id="movie-genre"></span></p>
-                <p id="movie-description"></p>
-                <button id="anotherBtn">Another One</button>
+            <div id="selected-movie">
+                <p class="no-data"></p>
             </div>
-
           </div>
         </div>
-        
+        <script>
+    async function loadMovieDetails() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const movieId = urlParams.get('id');
+
+    if (!movieId) {
+        document.getElementById('selected-movie').innerHTML = '<p class="no-data">No movie selected.</p>';
+        return;
+    }
+
+    try {
+        const response = await fetch(`http://localhost:3000/api/movies/${movieId}`);
+        const movie = await response.json();
+
+        const movieHTML = `
+            <div class = "movie-head"> 
+                <h1>${movie.title}</h1>
+                <p><strong>Director:</strong> ${movie.director || 'N/A'} &nbsp; | &nbsp; <strong>Release Year:</strong> ${movie.year || 'N/A'}</p>
+            </div>
+            <div class="movie-content">
+                <div class="movie-poster">
+                    <img src="${movie.poster_url}" alt="Poster of ${movie.title}" style="max-width: 200px;">
+                </div>
+                <div class="movie-info">
+                    <p>${movie.overview || 'N/A'}</p>
+                    <p><strong>Genres:</strong> ${(movie.genres || []).join(', ')}</p>
+                    <p><strong>Cast:</strong> ${Array.isArray(movie.actors) ? movie.actors.join(', ') : (movie.actors || 'N/A')}</p>
+                    <p><strong>Characters:</strong> ${Array.isArray(movie.characters) ? movie.characters.join(', ') : (movie.characters || 'N/A')}</p>
+                    <p><strong>Rating:</strong> ${movie.rating || 'N/A'}</p>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('selected-movie').innerHTML = movieHTML;
+    } catch (err) {
+        console.error('Error loading movie details:', err);
+        document.getElementById('selected-movie').innerHTML = '<p class="no-data">Failed to load movie details.</p>';
+    }
+}
+
+
+    // Call function when page loads
+    loadMovieDetails();
+</script>
+
+
         <!-- FOOTER -->
         <footer>
             <p>Contact Us</p>

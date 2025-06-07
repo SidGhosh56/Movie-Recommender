@@ -16,8 +16,15 @@ connectDB(); // ✅ Connect to DB
 app.use(cors());
 app.use(express.json());
 app.use("/api/movies", movieRoutes);
-app.use('/api/users', userRoutes);
+console.log("Movie routes loaded:");
+movieRoutes.stack.forEach(layer => {
+  if (layer.route) {
+    console.log(`${Object.keys(layer.route.methods).join(', ').toUpperCase()} ${layer.route.path}`);
+  }
+});
 
+app.use('/api/users', userRoutes);
+app.use('/api/recommended-by-genres',userRoutes);
 // === Route to call Python model for recommendations ===
 app.post("/api/recommend", async (req, res) => {
   const { title } = req.body;  // Movie title from the frontend

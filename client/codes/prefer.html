@@ -136,7 +136,7 @@
       // Get userId and token from localStorage
       const userId = localStorage.getItem('userId');
       const token = localStorage.getItem('token');
-      if (!userId || !token) {
+      if (!token) {
         alert('User not logged in properly.');
         return;
       }
