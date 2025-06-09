@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
   },
 
   watchedMovies: [{ 
-                    movieId: { type: mongoose.Schema.Types.ObjectId, ref: 'Movie' },
+                    movieId: { type: mongoose.Schema.Types.ObjectId, ref: 'Movie'  },
                     watchedAt: { type: Date, default: Date.now }
                   }],
   watchlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Movie' }]

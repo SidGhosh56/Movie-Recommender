@@ -73,7 +73,7 @@
     <!-- Recommendations -->
     <div class="recommend">
     <h3>Recommended Movies</h3>
-    <div id="recommendation-row" class="movies-container recommendations-row"></div>
+    <div id="recommendation-row" class="rr-movies-container recommendations-row"></div>
     </div>
     </div>
   </div>
@@ -108,25 +108,8 @@ if (!query) {
 } else {
   searchQueryText.innerText = `Showing results for: "${query}"`;
   const userId = localStorage.getItem("userId");  // Store this during login
-  
-// Log search interaction
-if (userId) {
-  fetch('http://localhost:5001/api/log_interaction', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      userId: userId,
-      movieId: null,
-      action: "search",
-      searchQuery: query
-    })
-  })
-  .then(res => res.json())
-  .then(data => console.log("Interaction logged:", data))
-  .catch(err => console.error("Failed to log search interaction:", err));
-}
+ 
+
 
   fetch('http://localhost:5001/search_and_recommend', {
     method: 'POST',
@@ -151,7 +134,7 @@ if (userId) {
     // Append searched movies on top
     data.matches.forEach(movie => {
       const movieCard = document.createElement('div');
-      movieCard.className = 'movie-card';
+      movieCard.className = 'r-movie-card';
 
       const poster = movie.poster_url || 'default_poster.jpg';
       movieCard.innerHTML = `
@@ -159,18 +142,21 @@ if (userId) {
         <img src="${poster}" alt="${movie.title_with_year}" style="width:100%; border-radius:8px; margin-bottom:10px;">
         <h3>${movie.title_with_year}</h3>
         <p>Rating: ${movie.rating.toFixed(1)}</p>
-        </a>
-        <button 
-        class="add-watchlist-btn" 
-        data-id="${movie.id}" 
-        data-title="${movie.title_with_year}" 
-        data-poster="${movie.poster}" 
-        data-rating="${movie.rating}">
-        Add to Watchlist
-        </button>
-
-      `;
-
+      </a>
+       <div class="s-add-btn-wrapper">
+              <button class="s-add-btn" title="Add to list">
+                <span class="s-add"> + </span>
+              </button>
+              <div class="s-add-menu hidden">
+                <div class="s-add-option" data-action="watchlist">Add to Watchlist</div>
+                <div class="s-add-option" data-action="tracker">Add To Tracker</div>
+              </div>
+          </div>
+  `;
+      movieCard.setAttribute('data-id', movie.id);
+      movieCard.setAttribute('data-title', movie.title_with_year);
+      movieCard.setAttribute('data-poster', movie.poster_url);
+      movieCard.setAttribute('data-rating', movie.rating);
       searchedMovieContainer.appendChild(movieCard);
 
       // Append up to 5 recommendations below
@@ -180,13 +166,25 @@ if (userId) {
           recMovie.className = 'rec-movie';
           const recPoster = rec.poster_url || 'default_poster.jpg';
           recMovie.innerHTML = `
-          <a href="movie.html?id=${rec.id}">
-            <img src="${recPoster}" alt="${rec.title_with_year}" style="width:100%; border-radius:6px; margin-bottom:8px;">
+          <a href="movie.html?id=${rec.id || rec._id}">
+            <img src="${recPoster}" alt="${rec.title_with_year}">
             <h4>${rec.title_with_year}</h4>
             <p>Rating: ${rec.rating.toFixed(1)}</p>
             </a>
-            <button class="add-watchlist-btn" data-id="${rec.id}">Add to Watchlist</button>
+            <div class="s-add-btn-wrapper">
+              <button class="s-add-btn" title="Add to list">
+                <span class="s-add"> + </span>
+              </button>
+              <div class="s-add-menu hidden">
+                <div class="s-add-option" data-action="watchlist" data-id="${rec.id}">Add to Watchlist</div>
+                <div class="s-add-option" data-action="tracker" data-id="${rec.id}">Add To Tracker</div>
+              </div>
+          </div>
           `;
+          recMovie.setAttribute('data-id', rec.id || rec._id);
+          recMovie.setAttribute('data-title', rec.title_with_year);
+          recMovie.setAttribute('data-poster', rec.poster_url);
+          recMovie.setAttribute('data-rating', rec.rating);
           recommendationRow.appendChild(recMovie);
           searchResults.push({
       id: rec.id,
@@ -239,20 +237,111 @@ async function addToWatchlist(movie) {
     console.error('Error adding to watchlist:', err);
   }
 }
+async function addToTracker(movie) {
+  const token = localStorage.getItem('token'); // JWT stored after login
 
-document.addEventListener('click', async (e) => {
-  if (e.target.classList.contains('add-watchlist-btn')) {
-    const id = e.target.dataset.id;
-    const movie = searchResults.find(m => String(m.id) === id);
-    if (!movie) {
-      alert('Movie data not found.');
-      return;
-    }
-
-    await addToWatchlist(movie);
+  if (!token) {
+    alert("Please log in to add to your tracker.");
+    return;
   }
-});
 
+  try {
+    const res = await fetch('http://localhost:3000/api/users/tracker', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        movieId: movie.id,
+        title: movie.title_with_year,
+        poster_url: movie.poster_url,
+        rating: movie.rating
+      })
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      alert('Added to tracker!');
+      // Optionally, reload tracker or update UI here
+    } else {
+      alert(data.message || 'Failed to add to tracker.');
+    }
+  } catch (err) {
+    console.error('Error adding to tracker:', err);
+  }
+}
+
+document.addEventListener('click', function(event) {
+                    const clicked = event.target;
+
+                    // Find if the clicked element is the add button or inside it
+                    const addBtn = clicked.closest('.s-add-btn');
+                    const addMenu = clicked.closest('.s-add-menu');
+
+                    // If click on the add button
+                    if (addBtn) {
+                       console.log('Add button clicked');
+                        event.stopPropagation(); // prevent event bubbling up to document click
+
+                        const wrapper = addBtn.closest('.s-add-btn-wrapper');
+                        if (!wrapper) return;
+
+                        // Toggle the menu inside the wrapper
+                        const menu = wrapper.querySelector('.s-add-menu');
+                        if (menu) {
+                        menu.classList.toggle('hidden');
+                        }
+
+                        // Close all other open menus except this one
+                        document.querySelectorAll('.s-add-menu:not(.hidden)').forEach(m => {
+                        if (m !== menu) m.classList.add('hidden');
+                        });
+
+                    } 
+                    // If click inside an open menu option
+                    else if (addMenu) {
+                        event.stopPropagation();
+
+                        if (clicked.classList.contains('s-add-option')) {
+                            console.log('Clicked element:', clicked);
+                        const movieItem = clicked.closest('.rec-movie') || clicked.closest('.r-movie-card');
+                        if (!movieItem) return;
+
+                        const id = movieItem.dataset.id;
+                        const title = movieItem.dataset.title;
+                        const poster = movieItem.dataset.poster;
+                        const rating = movieItem.dataset.rating;
+
+                        console.log(id, title, poster, rating);
+                        const option = clicked.innerText;
+                        if (option.includes('Watchlist')) {
+                            addToWatchlist({
+                              id,
+                              title_with_year: title,
+                              poster_url: poster,
+                              rating: parseFloat(rating)
+                            });
+                        } else if (option.includes('Tracker')) {
+                            addToTracker({
+                              id,
+                              title_with_year: title,
+                              poster_url: poster,
+                              rating: parseFloat(rating)
+                            });
+                        }
+
+                        // Close the menu after selection
+                        addMenu.classList.add('hidden');
+                        }
+                    }
+                    // Else click outside any menu or button, close all menus
+                    else {
+                        document.querySelectorAll('.s-add-menu:not(.hidden)').forEach(menu => {
+                        menu.classList.add('hidden');
+                        });
+                    }
+                    });
       // Handle search input (enter key to trigger search)
       input.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {

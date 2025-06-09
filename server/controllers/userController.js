@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Movie = require('../models/Movie'); 
 
 exports.updateProfile = async (req, res) => {
   const { fullName, bio, genres, dob } = req.body;
@@ -44,24 +45,33 @@ exports.addWatchedMovie = async (req, res) => {
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ error: 'User not found' });
 
+    // Find the actual movie document
+    const movie = await Movie.findOne({ id: movieId });  // use your TMDb id field here
+    if (!movie) {
+      return res.status(404).json({ error: 'Movie not found in database' });
+    }
+
     const alreadyWatched = user.watchedMovies.some(
-      entry => entry.movieId.toString() === movieId
+      entry => entry.movieId && entry.movieId.toString() === movie._id.toString()
     );
 
     if (!alreadyWatched) {
       user.watchedMovies.push({
-        movieId,
+        movieId: movie._id,   // push correct ObjectId
         watchedAt: new Date()
       });
       await user.save();
+      return res.json({ message: 'Movie added to watched list' });
     }
 
-    res.json({ message: 'Movie added to watched list' });
+    res.json({ message: 'Movie already in watched list' });
+
   } catch (error) {
     console.error('Error adding watched movie:', error);
     res.status(500).json({ error: 'Server error' });
   }
 };
+
 
 exports.removeWatchedMovie = async (req, res) => {
   const { movieId } = req.params;
@@ -87,19 +97,28 @@ exports.getWatchedMovies = async (req, res) => {
   const userId = req.user.id;
 
   try {
+    // Populate movieId in watchedMovies
     const user = await User.findById(userId).populate('watchedMovies.movieId');
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     const watchedMovies = user.watchedMovies
       .sort((a, b) => b.watchedAt - a.watchedAt)
-      .map(entry => ({
-      id: entry.movieId._id,
-      title: entry.movieId.title,
-      poster_url: entry.movieId.poster_url,
-      year: entry.movieId.year,
-      rating: entry.movieId.rating,
-      watchedAt: entry.watchedAt
-    }));
+      .map((entry) => {
+        const movie = entry.movieId;  // populated movie document
+
+        // Check if movie exists (not null)
+        if (!movie) return null;
+
+        return {
+          id: movie._id,
+          title: movie.title,
+          poster_url: movie.poster_url,
+          year: movie.year,
+          rating: movie.rating,
+          watchedAt: entry.watchedAt
+        };
+      })
+      .filter(m => m !== null);  // filter out null entries (missing movies)
 
     res.json({ movies: watchedMovies });
   } catch (error) {
@@ -107,6 +126,7 @@ exports.getWatchedMovies = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
 
 exports.savePreferences = async (req, res) => {
   const { favoriteGenres, favoriteMovies } = req.body;

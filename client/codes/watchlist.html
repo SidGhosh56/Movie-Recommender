@@ -162,9 +162,11 @@
                 const movieDiv = document.createElement('div');
                 movieDiv.classList.add('movie-card');
                 movieDiv.innerHTML = `
+                <a href="movie.html?id=${movie._id}">
                     <img src="${movie.poster_url || 'placeholder.jpg'}" alt="${movie.title}" />
                     <h4>${movie.title}</h4>
                     <p>Rating: ${movie.rating || 'N/A'}</p>
+                </a>
                     <button class="remove-btn" data-id="${movie._id}">Remove</button>
                 `;
                 container.appendChild(movieDiv);

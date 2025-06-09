@@ -23,8 +23,7 @@ movieRoutes.stack.forEach(layer => {
   }
 });
 
-app.use('/api/users', userRoutes);
-app.use('/api/recommended-by-genres',userRoutes);
+//app.use('/api/recommended-by-genres',userRoutes);
 // === Route to call Python model for recommendations ===
 app.post("/api/recommend", async (req, res) => {
   const { title } = req.body;  // Movie title from the frontend
@@ -56,6 +55,16 @@ app.get("/test-db", async (req, res) => {
     }
 });
 
+connectDB().then(async () => {
+  try {
+    await Movie.init(); // Ensures indexes declared in schema are created
+    console.log('Movie indexes ensured.');
+  } catch (err) {
+    console.error('Error creating indexes:', err);
+  }
+});
+
+app.use('/api/users', userRoutes);
 app.use('/api/recommend', recommendRoute);
 app.use('/api/auth', authRoutes); // Add auth routes
 

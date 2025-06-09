@@ -82,16 +82,73 @@
             <button id="surpriseBtn">Click Here!</button>
 
             <div id="s-movie-card" class="s-movie-card" style="display:none;">
+            <a href="movie.html?id=${movie._id}">
                 <img id="movie-poster" src="" alt="Movie Poster">
                 <h3 id="movie-title"></h3>
                 <p><strong>Genre:</strong> <span id="movie-genre"></span></p>
                 <p id="movie-description"></p>
+            </a>
                 <button id="anotherBtn">Another One</button>
+                <div class="s-add-btn-wrapper">
+              <button class="s-add-btn" title="Add to list">
+                <span class="s-add"> + </span>
+              </button>
+              <div class="s-add-menu hidden">
+                <div class="s-add-option" data-action="watchlist">Add to Watchlist</div>
+                <div class="s-add-option" data-action="tracker">Add To Tracker</div>
+              </div>
+          </div>
             </div>
 
           </div>
         </div>
-        
+        <script>
+            // Handle clicks on the whole document
+document.addEventListener('click', function(e) {
+  // 1️⃣ Check if click was inside add-btn → toggle menu
+  const btnWrapper = e.target.closest('.s-add-btn-wrapper');
+  
+  if (btnWrapper && e.target.closest('.s-add-btn')) {
+    // Toggle this menu only
+    const menu = btnWrapper.querySelector('.s-add-menu');
+    menu.classList.toggle('hidden');
+
+    // Close any other open menus
+    document.querySelectorAll('.s-add-menu').forEach(otherMenu => {
+      if (otherMenu !== menu) {
+        otherMenu.classList.add('hidden');
+      }
+    });
+
+    return; // Stop processing further
+  }
+
+  // 2️⃣ Check if clicked on an option → perform action
+  if (e.target.classList.contains('s-add-option')) {
+    const action = e.target.dataset.action;
+    const movieId = document.querySelector('#s-movie-card a').href.split('=')[1]; // extract movie ID from link
+
+    console.log(`Adding movie ${movieId} to ${action}`);
+
+    // Example: you can call your API here:
+    // fetch('/api/addToList', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({ movieId, action })
+    // }).then(response => response.json())
+    //   .then(data => console.log(data));
+
+    // Close all menus
+    document.querySelectorAll('.s-add-menu').forEach(menu => menu.classList.add('hidden'));
+
+    return; // Done
+  }
+
+  // 3️⃣ If clicked anywhere else → close all menus
+  document.querySelectorAll('.s-add-menu').forEach(menu => menu.classList.add('hidden'));
+});
+
+        </script>
         <!-- FOOTER -->
         <footer>
             <p>Contact Us</p>

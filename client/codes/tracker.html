@@ -84,6 +84,75 @@
           </div>
         </div>
 
+        <script>
+            async function loadWatchedMovies() {
+                try {
+                    const response = await fetch('http://localhost:3000/api/users/watched-movies', {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    const container = document.getElementById('watched-movies-list');
+                    container.innerHTML = ''; // clear previous content
+
+                    if (!data.movies || data.movies.length === 0) {
+                        container.innerHTML = '<p class="no-data">You haven\'t tracked any movies yet. Start watching to see your stats!</p>';
+                        return;
+                    }
+
+                    data.movies.forEach(movie => {
+                        const movieCard = document.createElement('div');
+                        movieCard.classList.add('w-movie-card');
+
+                        movieCard.innerHTML = `
+                            <img src="${movie.poster_url}" alt="${movie.title}" class="movie-poster" />
+                            <div class="movie-info">
+                                <h3>${movie.title} (${movie.year})</h3>
+                                <p>⭐ ${movie.rating}</p>
+                                <p>Watched on: ${new Date(movie.watchedAt).toLocaleDateString()}</p>
+                                <button class="remove-btn" onclick="removeFromTracker('${movie.id}')">Remove</button>
+                            </div>
+                        `;
+
+                        container.appendChild(movieCard);
+                    });
+                } catch (error) {
+                    console.error('Error loading watched movies:', error);
+                }
+            }
+
+            async function removeFromTracker(movieId) {
+                if (!confirm('Are you sure you want to remove this movie from your tracker?')) return;
+
+                try {
+                    const response = await fetch(`http://localhost:3000/api/users/tracker/${movieId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+                    console.log(data.message);
+
+                    // Reload watched movies after removing
+                    loadWatchedMovies();
+                } catch (error) {
+                    console.error('Error removing movie:', error);
+                }
+            }
+
+            // Load watched movies when the page loads
+            window.addEventListener('DOMContentLoaded', loadWatchedMovies);
+
+        </script>
+
         <!-- FOOTER -->
         <footer>
             <p>Contact Us</p>

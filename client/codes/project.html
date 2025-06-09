@@ -148,7 +148,7 @@
                                     </button>
                                     <div class="add-menu hidden">
                                         <div class="add-option watchlist">Add to Watchlist</div>
-                                        <div class="add-option watched">Add to Watched</div>
+                                        <div class="add-option watched">Add To Tracker</div>
                                     </div>
                                 </div>
                                 <p>Rating: ${movie.rating}</p>
@@ -162,8 +162,6 @@
                         }
                         }
 
-                        
-                        // Call the function on page load
                     </script>
                 </div>
                 <div class="section-3">
@@ -212,7 +210,7 @@
                                 </button>
                                 <div class="add-menu hidden">
                                     <div class="add-option">Add to Watchlist</div>
-                                    <div class="add-option">Add to Watched</div>
+                                    <div class="add-option">Add To Tracker</div>
                                 </div>
                             </div><br>
                             <p>Rating: ${movie.rating}</p>
@@ -261,17 +259,17 @@
                         const movieItem = clicked.closest('.movie-item');
                         if (!movieItem) return;
 
-const id = movieItem.dataset.id;
-const title = movieItem.dataset.title;
-const poster = movieItem.dataset.poster;
-const rating = movieItem.dataset.rating;
+                        const id = movieItem.dataset.id;
+                        const title = movieItem.dataset.title;
+                        const poster = movieItem.dataset.poster;
+                        const rating = movieItem.dataset.rating;
 
-console.log(id, title, poster, rating);
+                        console.log(id, title, poster, rating);
                         const option = clicked.innerText;
                         if (option.includes('Watchlist')) {
                             addToWatchlist(id, title, poster, rating);
-                        } else if (option.includes('Watched')) {
-                            addToWatched(title);
+                        } else if (option.includes('Tracker')) {
+                            addToTracker(id);
                         }
 
                         // Close the menu after selection
@@ -314,9 +312,31 @@ console.log(id, title, poster, rating);
                         }
                     }
 
-                    function addToWatched(title) {
-                    alert(`Marked "${title}" as Watched!`);
-                    // Your code here
+                    async function addToTracker(movieId) {
+                        const token = localStorage.getItem('token');
+                        if (!token) {
+                            alert("Please log in to mark movies as watched.");
+                            return;
+                        }
+                        try {
+                            const res = await fetch('http://localhost:3000/api/users/tracker', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${token}`
+                                },
+                                body: JSON.stringify({ movieId })
+                            });
+
+                            const data = await res.json();
+                            if (res.ok) {
+                                alert(`Movie marked as Watched!`);
+                            } else {
+                                alert(data.error || data.message || 'Failed to add to Tracker.');
+                            }
+                        } catch (err) {
+                            console.error('Error adding to Tracker:', err);
+                        }
                     }
                     // Call both on load
                     loadRecommendedByGenres();

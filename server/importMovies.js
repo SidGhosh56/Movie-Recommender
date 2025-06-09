@@ -16,12 +16,21 @@ const connectDB = async () => {
         // Transform genres from string to array for each movie
         movies = movies.map(movie => {
             // Check if genres field exists and is a string
-            if (movie.genres && typeof movie.genres === 'string') {
-                movie.genres = movie.genres.split(',').map(g => g.trim());
-            } else {
-                movie.genres = []; // default empty array if missing
-            }
-            return movie;
+            return {
+    id: movie.id,
+    title: movie.title,
+    overview: movie.overview,
+    director: movie.directors || movie.director || 'N/A',  // try both spellings
+    actors: movie.actors ? movie.actors.split('|').map(a => a.trim()) : [],
+    characters: movie.characters ? movie.characters.split('|').map(c => c.trim()) : [],
+    genres: movie.genres ? movie.genres.split(',').map(g => g.trim()) : [],
+    year: movie.year,
+    votes: isNaN(Number(movie.votes)) ? 0 : Number(movie.votes),
+popularity: isNaN(Number(movie.popularity)) ? 0 : Number(movie.popularity),
+budget: isNaN(Number(movie.budget)) ? 0 : Number(movie.budget),
+rating: isNaN(parseFloat(movie.rating)) ? 0 : parseFloat(movie.rating),
+    poster_url: movie.poster_url || '',
+  };
         });
 
         await Movie.insertMany(movies);

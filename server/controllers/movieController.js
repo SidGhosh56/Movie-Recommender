@@ -46,9 +46,15 @@ exports.getSurpriseMovie = async (req, res) => {
 
         if (!favoriteGenres || favoriteGenres.length === 0) {
             // Fallback to fully random movie if no favorite genres
-            const count = await Movie.countDocuments();
+            const count = await Movie.countDocuments({
+                rating: { $gte: 6.5 },
+                votes: { $gte: 50 }
+            });
             const randomIndex = Math.floor(Math.random() * count);
-            const randomMovie = await Movie.findOne().skip(randomIndex);
+            const randomMovie = await Movie.findOne({
+              rating: { $gte: 6.5 },
+              votes: { $gte: 50 }
+            }).skip(randomIndex);
 
             if (!randomMovie) {
                 return res.status(404).json({ error: "No movies found" });
@@ -59,7 +65,9 @@ exports.getSurpriseMovie = async (req, res) => {
 
         // If user has favorite genres → pick a random movie from those genres
         const matchingMovies = await Movie.find({
-            genres: { $in: favoriteGenres }
+            genres: { $in: favoriteGenres },
+            rating: { $gte: 7 },
+            votes: { $gte: 500 }
         });
 
         if (matchingMovies.length === 0) {
@@ -116,40 +124,40 @@ exports.getRecommendedByGenres = async (req, res) => {
     }
 
     const m = 50; // minimum votes to qualify (you can tweak this)
-const CResult = await Movie.aggregate([
-  { $group: { _id: null, averageRating: { $avg: "$rating" } } }
-]);
-const C = CResult[0]?.averageRating || 0;
+    const CResult = await Movie.aggregate([
+      { $group: { _id: null, averageRating: { $avg: "$rating" } } }
+    ]);
+    const C = CResult[0]?.averageRating || 0;
 
-const genreRegexes = favoriteGenres.map(g => new RegExp(`\\b${g}\\b`, 'i'));
+    const genreRegexes = favoriteGenres.map(g => new RegExp(`\\b${g}\\b`, 'i'));
 
-const recommendedMovies = await Movie.aggregate([
-  {
-    $match: {
-      $or: genreRegexes.map(regex => ({ genres: regex })),
-      votes: { $gte: m }
-    }
-  },
-  {
-    $addFields: {
-      weightedRating: {
-        $add: [
-          { $multiply: [ { $divide: ["$votes", { $add: ["$votes", m] }] }, "$rating" ] },
-          { $multiply: [ { $divide: [m, { $add: ["$votes", m] }] }, C ] }
-        ]
+    const recommendedMovies = await Movie.aggregate([
+      {
+        $match: {
+          $or: genreRegexes.map(regex => ({ genres: regex })),
+          votes: { $gte: m }
+        }
+      },
+      {
+        $addFields: {
+          weightedRating: {
+            $add: [
+              { $multiply: [ { $divide: ["$votes", { $add: ["$votes", m] }] }, "$rating" ] },
+              { $multiply: [ { $divide: [m, { $add: ["$votes", m] }] }, C ] }
+            ]
+          }
+        }
+      },
+      { $sort: { weightedRating: -1 } },
+      { $limit: 10 }
+    ]);
+
+        res.status(200).json({ movies: recommendedMovies });
+      } catch (error) {
+        console.error('Error fetching recommended movies:', error);
+        res.status(500).json({ message: 'Server error' });
       }
-    }
-  },
-  { $sort: { weightedRating: -1 } },
-  { $limit: 10 }
-]);
-
-    res.status(200).json({ movies: recommendedMovies });
-  } catch (error) {
-    console.error('Error fetching recommended movies:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
+    };
 
 exports.getPopularMovies = async (req, res) => {
   try {
@@ -185,13 +193,68 @@ exports.getPopularMovies = async (req, res) => {
 
 exports.getMovieById = async (req, res) => {
   try {
-    const movie = await Movie.findById(req.params.id);
+    const movieId = req.params.id;
+    let movie;
+
+    // If movieId is numeric, search by "id" field
+    if (!isNaN(movieId)) {
+      movie = await Movie.findOne({ id: parseInt(movieId) });
+
+      if (movie && movie._id) {
+        movie = await Movie.findById(movie._id); // Now guaranteed to get full fields
+      }
+    } else {
+      movie = await Movie.findById(movieId);
+    }
+
     if (!movie) {
       return res.status(404).json({ message: 'Movie not found' });
     }
     res.json(movie);
+    console.log('Movie data fetched:', movie);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.getSimilarMovies = async (req, res) => {
+  try {
+    // Find the movie by ID first
+    const movieId = req.params.id;
+    let movie;
+
+    // If movieId is numeric, search by "id" field
+    if (!isNaN(movieId)) {
+      movie = await Movie.findOne({ id: parseInt(movieId) });
+
+      if (movie && movie._id) {
+        movie = await Movie.findById(movie._id);
+      }
+    } else {
+      movie = await Movie.findById(movieId);
+    }
+    if (!movie) {
+      return res.status(404).json({ error: 'Movie not found' });
+    }
+
+     const overviewSearch = movie.overview ? movie.overview.substring(0, 500) : '';
+
+    // Build query
+    const query = {
+      _id: { $ne: movie._id },
+      genres: { $in: movie.genres },
+      $text: { $search: overviewSearch },
+      rating: { $gte: 7, $lte: 9 },  // rating >= movie.rating
+      //votes: { $gte: movie.votes }     // votes >= movie.votes
+    };
+    const similarMovies = await Movie.find(query, { score: { $meta: "textScore" } })
+      .sort({ score: { $meta: "textScore" } })
+      .limit(10);
+     res.json({ movies: similarMovies });
+
+  } catch (error) {
+    console.error('Error fetching similar movies:', error);
+    res.status(500).json({ error: 'Server error fetching similar movies' });
   }
 };

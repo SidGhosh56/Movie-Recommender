@@ -6,8 +6,8 @@ const movieSchema = new mongoose.Schema({
     overview: String,
     genres: [String],
     director: String,
-    actors: String,
-    characters: String,
+    actors: [String],
+    characters: [String],
     year: Number,
     votes: Number,
     rating: Number,
@@ -15,5 +15,5 @@ const movieSchema = new mongoose.Schema({
     budget: Number,
     poster_url: String
 });
-
+movieSchema.index({ overview: 'text' });
 module.exports = mongoose.model("Movie", movieSchema);

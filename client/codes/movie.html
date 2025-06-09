@@ -80,52 +80,117 @@
             <div id="selected-movie">
                 <p class="no-data"></p>
             </div>
+                <div class="recommendations-section">
+                    <h2>Similar Movies</h2>
+                    <div id="recommendations-container" class="recommendations-container">
+                        <p class="no-data">Loading recommendations...</p>
+                    </div>
+                </div>
           </div>
         </div>
         <script>
-    async function loadMovieDetails() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const movieId = urlParams.get('id');
+            async function loadMovieDetails() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const movieId = urlParams.get('id');
 
-    if (!movieId) {
-        document.getElementById('selected-movie').innerHTML = '<p class="no-data">No movie selected.</p>';
-        return;
-    }
+                if (!movieId) {
+                    document.getElementById('selected-movie').innerHTML = '<p class="no-data">No movie selected.</p>';
+                    return;
+                }
 
-    try {
-        const response = await fetch(`http://localhost:3000/api/movies/${movieId}`);
-        const movie = await response.json();
+                try {
+                    const response = await fetch(`http://localhost:3000/api/movies/${movieId}`);
+                    const movie = await response.json();
+                    const movieHTML = `
+                        <div class = "movie-head"> 
+                            <h1>${movie.title}</h1>
+                            <p><strong>Director:</strong> ${movie.director || 'N/A'} &nbsp; | &nbsp; <strong>Release Year:</strong> ${movie.year || 'N/A'}</p>
+                        </div>
+                        <div class="movie-content">
+                            <div class="movie-poster">
+                                <img src="${movie.poster_url}" alt="Poster of ${movie.title}" style="max-width: 200px;">
+                            </div>
+                            <div class="movie-info">
+                                <p>${movie.overview || 'N/A'}</p>
+                                <p><strong>Genres:</strong> ${(movie.genres || []).join(', ')}</p>
+                                <p><strong>Cast:</strong> ${Array.isArray(movie.actors) ? movie.actors.join(', ') : (movie.actors || 'N/A')}</p>
+                                <p><strong>Characters:</strong> ${Array.isArray(movie.characters) ? movie.characters.join(', ') : (movie.characters || 'N/A')}</p>
+                                <p><strong>Rating:</strong> ${movie.rating || 'N/A'}</p>
+                            </div>
+                        </div>
+                    `;
 
-        const movieHTML = `
-            <div class = "movie-head"> 
-                <h1>${movie.title}</h1>
-                <p><strong>Director:</strong> ${movie.director || 'N/A'} &nbsp; | &nbsp; <strong>Release Year:</strong> ${movie.year || 'N/A'}</p>
-            </div>
-            <div class="movie-content">
-                <div class="movie-poster">
-                    <img src="${movie.poster_url}" alt="Poster of ${movie.title}" style="max-width: 200px;">
-                </div>
-                <div class="movie-info">
-                    <p>${movie.overview || 'N/A'}</p>
-                    <p><strong>Genres:</strong> ${(movie.genres || []).join(', ')}</p>
-                    <p><strong>Cast:</strong> ${Array.isArray(movie.actors) ? movie.actors.join(', ') : (movie.actors || 'N/A')}</p>
-                    <p><strong>Characters:</strong> ${Array.isArray(movie.characters) ? movie.characters.join(', ') : (movie.characters || 'N/A')}</p>
-                    <p><strong>Rating:</strong> ${movie.rating || 'N/A'}</p>
-                </div>
-            </div>
-        `;
+                    document.getElementById('selected-movie').innerHTML = movieHTML;
+                    }
+                    catch (err) {
+                    console.error('Error loading movie details:', err);
+                    document.getElementById('selected-movie').innerHTML = '<p class="no-data">Failed to load movie details.</p>';
+                }
+            }
+                async function loadSimilarMovies() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const movieId = urlParams.get('id');
 
-        document.getElementById('selected-movie').innerHTML = movieHTML;
-    } catch (err) {
-        console.error('Error loading movie details:', err);
-        document.getElementById('selected-movie').innerHTML = '<p class="no-data">Failed to load movie details.</p>';
-    }
-}
+                const container = document.getElementById('recommendations-container');
+                container.innerHTML = '<p class="no-data">Loading recommendations...</p>';
 
+                if (!movieId) {
+                    container.innerHTML = '<p class="no-data">No movie selected.</p>';
+                    return;
+                }
 
-    // Call function when page loads
-    loadMovieDetails();
-</script>
+                try {
+                    // Fetch similar movies from your backend API endpoint
+                    const response = await fetch(`http://localhost:3000/api/movies/${movieId}/similar`, {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`  // if your API requires auth
+                        }
+                    });
+
+                    if (!response.ok) throw new Error('Failed to fetch similar movies');
+
+                    const data = await response.json();
+
+                    if (!data.movies || data.movies.length === 0) {
+                        container.innerHTML = '<p class="no-data">No similar movies found.</p>';
+                        return;
+                    }
+
+                    container.innerHTML = ''; // clear loading text
+
+                    // Create a container div to hold movie cards
+                    const movieList = document.createElement('div');
+                    movieList.classList.add('movie-list');  // add a class for styling if needed
+
+                    data.movies.forEach(movie => {
+                        const movieItem = document.createElement('div');
+                        movieItem.classList.add('movie-item');
+                        movieItem.dataset.id = movie.id || movie._id;
+
+                        movieItem.innerHTML = `
+                            <a href="movie.html?id=${movie._id}">
+                                <img src="${movie.poster_url || 'default_poster.jpg'}" alt="${movie.title}" />
+                                <h4>${movie.title} (${movie.year || 'N/A'})</h4>
+                            </a>
+                            <p>Rating: ${movie.rating || 'N/A'}</p>
+                        `;
+
+                        movieList.appendChild(movieItem);
+                    });
+
+                    container.appendChild(movieList);
+
+                } catch (error) {
+                    console.error(error);
+                    container.innerHTML = '<p class="no-data">Failed to load recommendations.</p>';
+                }
+            }
+
+            
+            // Call function when page loads
+            loadMovieDetails();
+            loadSimilarMovies();
+        </script>
 
 
         <!-- FOOTER -->

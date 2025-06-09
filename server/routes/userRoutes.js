@@ -14,8 +14,8 @@ router.get('/me', auth, userController.getCurrentUser);
 
 router.get('/popular', auth, movieController.getPopularMovies);
 
-router.post('/watched', auth, userController.addWatchedMovie);
-router.delete('/watched/:movieId', auth, userController.removeWatchedMovie);
+router.post('/tracker', auth, userController.addWatchedMovie);
+router.delete('/tracker/:movieId', auth, userController.removeWatchedMovie);
 router.get('/watched-movies', auth, userController.getWatchedMovies);
 
 

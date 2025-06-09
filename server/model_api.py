@@ -5,9 +5,15 @@ import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
 from sklearn.metrics.pairwise import cosine_similarity
+from pymongo import MongoClient
+from bson.objectid import ObjectId
 
 app = Flask(__name__)
 CORS(app)  # Allow requests from other domains (e.g., frontend or Node.js)
+
+client = MongoClient('mongodb://localhost:27017/')  # change this if using auth
+db = client['CineVortex']   # example: 'movieDB'
+movies_collection = db['movies']
 
 # === LOAD AND PREPARE DATA ===
 df = pd.read_csv("./import/project.csv")
@@ -126,12 +132,49 @@ def search_and_recommend():
             "id": str(movie['id']),
             "title_with_year": title_with_year,
             "rating": movie['rating'],
-            "poster_url": movie['poster_url'],  # include poster
+            "poster_url": movie['poster_url'],
             "recommendations": recs
     })
 
     return jsonify({"matches": results})
 
+@app.route("/search_and_recommend/<movie_id>", methods=["GET"])
+def get_movie_by_id(movie_id):
+    try:
+        # First try to match the "id" field (your schema has id as String)
+        movie = movies_collection.find_one({"id": movie_id})
+
+        # If not found, try by _id (ObjectId), fallback
+        if not movie:
+            try:
+                movie = movies_collection.find_one({"_id": ObjectId(movie_id)})
+            except:
+                pass  # Ignore if not a valid ObjectId
+
+        if not movie:
+            return jsonify({"error": "Movie not found."}), 404
+
+        # Build response dict
+        movie_data = {
+            "id": movie.get('id'),
+            "title": movie.get('title'),
+            "overview": movie.get('overview'),
+            "genres": movie.get('genres'),
+            "director": movie.get('director'),
+            "actors": movie.get('actors'),
+            "characters": movie.get('characters'),
+            "year": movie.get('year'),
+            "rating": movie.get('rating'),
+            "poster_url": movie.get('poster_url')
+        }
+
+        return jsonify(movie_data)
+
+    except Exception as e:
+        print(e)
+        return jsonify({"error": "Server error"}), 500
+    
+    
 if __name__ == "__main__":
     app.run(port=5001)
 
