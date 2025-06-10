@@ -73,47 +73,7 @@ sidebar.addEventListener("click", (e) => {
 
 
 //SURPRISE ME
-const surpriseBtn = document.getElementById("surpriseBtn");
-const anotherBtn = document.getElementById("anotherBtn");
-const movieCard = document.getElementById("s-movie-card");
 
-surpriseBtn.addEventListener("click", fetchRandomMovie);
-anotherBtn.addEventListener("click", fetchRandomMovie);
-
-async function fetchRandomMovie() {
-      const token = localStorage.getItem("token");  // check if user is logged in
-      let url = "";
-
-      if (token) {
-          // User is logged in → personalized surprise
-          url = "http://localhost:3000/api/movies/surprise";
-      } else {
-          // User is not logged in → generic random movie
-          url = "http://localhost:3000/api/movies/random";
-      }
-
-      try {
-        const res = await fetch(url, {
-            headers: token ? { 'Authorization': `Bearer ${token}` } : {}  // send token if logged in
-        });
-
-        if (!res.ok) {
-            throw new Error("Failed to fetch movie.");
-        }
-        const movie = await res.json();
-
-        document.getElementById("movie-poster").src = movie.poster_url;
-        document.getElementById("movie-title").textContent = movie.title;
-        document.getElementById("movie-genre").textContent = movie.genres;
-        document.getElementById("movie-description").textContent = movie.overview;
-
-        movieCard.style.display = "block";
-        document.getElementById("surpriseBtn").style.display = "none";
-        
-      } catch (err) {
-          alert("Failed to fetch movie. Is the backend running?");
-      }
-  }
 
 //SETTINGS
 document.getElementById("save-btn").addEventListener("click", () => {

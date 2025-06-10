@@ -120,7 +120,7 @@
                             const data = await response.json();
 
                             const section2 = document.querySelector('.section-2');
-                            section2.innerHTML = '<h4 class="slide2-title">Movies Catered To Your Taste</h4>';
+                            section2.innerHTML = '<h4 class="slide2-title">You Might Like</h4>';
                             
                             if (data.movies.length === 0) {
                             section2.innerHTML += '<p>No recommendations available.</p>';

@@ -32,10 +32,20 @@
             <div class="search-container">
                 <div class="search">
                     <span class="search-icon material-symbols-outlined">search</span>
-                    <input class="search-input" type="search" placeholder="Search">
+                    <input class="search-input" type="search"  id="search-input" placeholder="Search">
                 </div>
             </div>
-
+             <script>
+            const input = document.getElementById('search-input');
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                const query = input.value.trim();
+                if (query) {
+                    window.location.href = `search.html?q=${encodeURIComponent(query)}`;
+                }
+                }
+            });
+            </script>
             <!-- Profile -->
             <div class="profile"> 
                 <img id="profile-img" src="https://cdn-icons-png.flaticon.com/512/6522/6522516.png">
@@ -66,12 +76,77 @@
 
         <!-- MAIN CONTENT -->
         <div class="s-container">
-          <div class="w-profile-box">
-            <h2>Community</h2>
-            <!-- Additional profile content can go here -->
-          </div>
+            <div class="wt-profile-box">
+                <h2 class="slide2-title">Community Picks: Popular Movies</h2>
+            </div>
+            <div class="w-movies-container" id="top-movies-grid">
+            <!-- Movies will be inserted here dynamically -->
+            </div>
         </div>
+        <script>
 
+document.addEventListener("DOMContentLoaded", async () => {
+    const grid = document.getElementById("top-movies-grid");
+
+    const token = localStorage.getItem("token");
+
+    try {
+        let response;
+        if (token) {
+            // User is logged in → try to fetch personalized popular movies
+            response = await fetch('http://localhost:3000/api/users/popular', {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+        } else {
+            // User not logged in → fallback to global top movies
+            response = await fetch('http://localhost:3000/api/movies/top_movies');
+        }
+
+        if (!response.ok) throw new Error('Failed to fetch movies');
+
+        const data = await response.json();
+
+        // If data.movies or data.top_movies depending on the API used
+        const movies = data.movies || data.top_movies;
+
+        if (!movies || movies.length === 0) {
+            grid.innerHTML = '<p>No movies found.</p>';
+            return;
+        }
+
+        grid.innerHTML = ''; // Clear previous content
+
+        movies.forEach(movie => {
+            const movieItem = document.createElement('div');
+            movieItem.classList.add('movie-card');
+            movieItem.innerHTML = `
+                <a href="movie.html?id=${movie.id || movie._id}">
+                    <img src="${movie.poster_url}" alt="${movie.title}" />
+                    <h4>${movie.title} (${movie.year})</h4>
+                </a>
+                <div class="add-btn-wrapper">
+                    <button class="add-btn" title="Add to list">
+                        <span class="add"> + </span>
+                    </button>
+                    <div class="add-menu hidden">
+                        <div class="add-option">Add to Watchlist</div>
+                        <div class="add-option">Add To Tracker</div>
+                    </div>
+                </div>
+                <p>Rating: ${movie.rating}</p>
+            `;
+            grid.appendChild(movieItem);
+        });
+    } catch (err) {
+        console.error('Error fetching movies:', err);
+        grid.innerHTML = '<p>Failed to load movies.</p>';
+    }
+});
+
+</script>
         <!-- FOOTER -->
         <footer>
             <p>Contact Us</p>

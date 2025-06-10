@@ -221,7 +221,7 @@ hr{
 }
 
 .slide-title {
-  font-size: 24px;
+  font-size: 32px;
   color: #3e0f67;
   text-align: center; /* optional, for better alignment */
   padding-bottom: 10px; 
@@ -231,11 +231,11 @@ hr{
 }
 
 .slide2-title {
-  font-size: 24px;
+  font-size: 30px;
   color: #360b5c;
   text-align: center; /* optional, for better alignment */
   padding-bottom: 10px; 
-  padding-top: 0px;
+  padding-top: 8px;
   margin-top: 0px;
   margin-bottom: 8px;
 }
@@ -491,6 +491,64 @@ footer{
         justify-content: right; 
     }
 }
+.login-box {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 320px;
+    margin: 30px auto;
+    padding: 30px;
+    background-color: #1f1f1f;
+    border-radius: 10px;
+    box-shadow: 0px 0px 12px rgba(0,0,0,0.4);
+    text-align: center;
+    color: #fff;
+}
+#root {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Ensures full viewport height */
+}
+.login-box h2 {
+    margin-bottom: 20px;
+    font-size: 22px;
+    color: #00ffff;
+}
+
+.login-box input[type="text"],
+.login-box input[type="email"],
+.login-box input[type="password"] {
+    width: 90%;
+    padding: 10px;
+    margin: 10px 0;
+    background: #333;
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+}
+
+.login-box input:focus {
+    outline: 2px solid aqua;
+}
+
+.login-box button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 15px;
+    background: linear-gradient(to right, rgb(226, 137, 137), aqua);
+    border: none;
+    border-radius: 25px;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.login-box button:hover {
+    background: linear-gradient(to right, aqua, rgb(226, 137, 137));
+}
 
 /*SURPRISE ME*/
 button#surpriseBtn, button#anotherBtn {
@@ -525,9 +583,9 @@ button#surpriseBtn, button#anotherBtn {
 }
 
 .movie-card img {
-  width: 60%;
-  height: auto;
-  max-height: 200px;
+  width: 80%;
+  height: 60%;
+  max-height: 300px;
   object-fit: cover;
   border-radius: 0px;
   aspect-ratio: 2 / 3;
@@ -712,6 +770,10 @@ input[type="email"] {
   color: lightgreen;
   text-align: center;
 }
+.settings-box{
+ background-image: url('https://img.freepik.com/premium-photo/beautiful-vintage-light-blue-background-wall-paint-decoration-backdrop_1962-1378.jpg');
+    
+}
 
 /*PROFILE*/
 .profile-container {
@@ -826,6 +888,7 @@ input[type="email"] {
   height: 100vh;
   overflow-y: auto;
   box-sizing: border-box;
+   background-image: url('https://img.freepik.com/premium-photo/beautiful-vintage-light-blue-background-wall-paint-decoration-backdrop_1962-1378.jpg');
 }
 
 .movies-container {
@@ -1220,7 +1283,7 @@ input[type="email"] {
   background-color: #115293;
 }
 
-.s-add-btn .add {
+.s-add-btn .s-add {
   font-size: 24px;
   color: white;
   position: relative;
@@ -1315,4 +1378,10 @@ input[type="email"] {
     margin: 4px 0;
     font-size: 14px;
     color: #555;
+}
+
+#search-query-text {
+  color: #3e0f67; /* Example: orange */
+  font-weight: bold; /* Optional */
+  font-size: 18px;    /* Optional */
 }

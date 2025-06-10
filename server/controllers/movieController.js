@@ -258,3 +258,24 @@ exports.getSimilarMovies = async (req, res) => {
     res.status(500).json({ error: 'Server error fetching similar movies' });
   }
 };
+
+exports.getTopMovies = async (req, res) => {
+    try {
+        const movies = await Movie.find({})
+            .sort({ votes: -1 })
+            .limit(20)
+            .select('title poster_url year rating votes popularity'); // selecting the needed fields
+
+        const response = movies.map(movie => ({
+            id: movie.id || movie._id,  
+            title: movie.title,
+            poster_url: movie.poster_url || 'default_poster.jpg',
+            year: movie.year || 'N/A',
+            rating: movie.rating !== undefined ? movie.rating.toFixed(1) : 'N/A' // format rating nicely
+        }));
+        res.json({ top_movies: response });
+    } catch (err) {
+        console.error('Error fetching top movies:', err);
+        res.status(500).json({ error: 'Failed to fetch top movies.' });
+    }
+};

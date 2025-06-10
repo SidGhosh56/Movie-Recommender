@@ -174,6 +174,24 @@ def get_movie_by_id(movie_id):
         print(e)
         return jsonify({"error": "Server error"}), 500
     
+@app.route('/top_movies', methods=['GET'])
+def top_movies():
+    # Sort by rating, then votes (both descending)
+    df_sorted = df.sort_values(by=['votes'], ascending=False)
+    top_20 = df_sorted.head(20)
+
+    movies = []
+    for _, row in top_20.iterrows():
+        movies.append({
+            'id': row['id'], 
+            'title': row['title'],
+            'poster_url': row['poster_url'] if pd.notna(row['poster_url']) else 'default_poster.jpg',
+            'year': row['year'] if pd.notna(row['year']) else 'N/A',
+            'rating': round(row['rating'], 1) if pd.notna(row['rating']) else 'N/A'
+        })
+
+    return jsonify({'top_movies': movies})
+
     
 if __name__ == "__main__":
     app.run(port=5001)
