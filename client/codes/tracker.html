@@ -77,7 +77,7 @@
         <!-- MAIN CONTENT -->
         <div class="s-container">
           <div class="w-profile-box">
-            <h2 class="slide2-title">Tracker</h2>
+            <h2 class="slide-title">Tracker</h2>
             <div id="watched-movies-list">
                 <p class="no-data">You haven't tracked any movies yet. Start watching to see your stats!</p>
             </div>
@@ -110,9 +110,11 @@
                         movieCard.classList.add('w-movie-card');
 
                         movieCard.innerHTML = `
+                        <a href="movie.html?id=${movie.id}">
                             <img src="${movie.poster_url}" alt="${movie.title}" class="movie-poster" />
                             <div class="movie-info">
                                 <h3>${movie.title} (${movie.year})</h3>
+                        </a>
                                 <p>⭐ ${movie.rating}</p>
                                 <p>Watched on: ${new Date(movie.watchedAt).toLocaleDateString()}</p>
                                 <button class="remove-btn" onclick="removeFromTracker('${movie.id}')">Remove</button>

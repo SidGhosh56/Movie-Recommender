@@ -108,8 +108,6 @@ if (!query) {
 } else {
   searchQueryText.innerText = `Showing results for: "${query}"`;
   const userId = localStorage.getItem("userId");  // Store this during login
- 
-
 
   fetch('http://localhost:5001/search_and_recommend', {
     method: 'POST',

@@ -238,20 +238,54 @@ exports.getSimilarMovies = async (req, res) => {
       return res.status(404).json({ error: 'Movie not found' });
     }
 
-     const overviewSearch = movie.overview ? movie.overview.substring(0, 500) : '';
+     const overviewSearch = movie.overview ? movie.overview.substring(0, 5000) : '';
 
     // Build query
     const query = {
       _id: { $ne: movie._id },
-      genres: { $in: movie.genres },
       $text: { $search: overviewSearch },
-      rating: { $gte: 7, $lte: 9 },  // rating >= movie.rating
-      //votes: { $gte: movie.votes }     // votes >= movie.votes
+      rating: { $gte: 7, $lte: 9 }
     };
-    const similarMovies = await Movie.find(query, { score: { $meta: "textScore" } })
+
+    const candidates = await Movie.find(query, { score: { $meta: "textScore" } })
       .sort({ score: { $meta: "textScore" } })
-      .limit(10);
-     res.json({ movies: similarMovies });
+      .lean();
+
+    const inputGenres = movie.genres || [];
+
+    // Filter: At least 2 genres must match
+    const genreFiltered = candidates.filter(candidate => {
+      const candidateGenres = candidate.genres || [];
+      const commonGenres = inputGenres.filter(g => candidateGenres.includes(g));
+      return commonGenres.length >= 2;
+    });
+
+    // Boost scores based on similarity factors
+    const boosted = genreFiltered.map(candidate => {
+      let boost = candidate.score || 0;
+ // Director match
+      if (candidate.director === movie.director) {
+        boost += 10;
+      }
+
+      // Higher or equal vote count
+      if (candidate.votes && movie.votes && candidate.votes >= movie.votes) {
+        boost += 2;
+      }
+
+      // Title similarity (word overlap)
+      const titleWords = movie.title.toLowerCase().split(/\s+/);
+      const candidateTitle = (candidate.title || "").toLowerCase();
+      const commonTitleWords = titleWords.filter(word => candidateTitle.includes(word));
+      boost += commonTitleWords.length * 1.5;
+
+      return { ...candidate, score: boost };
+    });
+
+    // Final top 10
+    const topMovies = boosted.sort((a, b) => b.score - a.score).slice(0, 10);
+
+    res.json({ movies: topMovies });
 
   } catch (error) {
     console.error('Error fetching similar movies:', error);
@@ -278,4 +312,95 @@ exports.getTopMovies = async (req, res) => {
         console.error('Error fetching top movies:', err);
         res.status(500).json({ error: 'Failed to fetch top movies.' });
     }
+};
+
+exports.rateMovie = async (req, res) => {
+  const { rating } = req.body;
+  const { id: movieId } = req.params;
+  const userId = req.user.id;
+
+  if (!rating || rating < 1 || rating > 10) {
+    return res.status(400).json({ message: 'Invalid rating. Must be between 1 and 10.' });
+  }
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: 'User not found.' });
+
+    // Update or add rating
+    const existing = user.ratings.find(r => r.movieId.toString() === movieId);
+
+    if (existing) {
+      existing.rating = rating;
+      existing.ratedAt = new Date();
+    } else {
+      user.ratings.push({ movieId, rating });
+    }
+
+    await user.save();
+
+    res.json({ message: 'Your rating has been saved.', rating });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+exports.getUserRating = async (req, res) => {
+  const userId = req.user.id;
+  const movieId = req.params.id;
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const ratingEntry = user.ratings.find(r => r.movieId.toString() === movieId);
+    if (!ratingEntry) {
+      return res.status(200).json({ rating: null });
+    }
+
+    res.status(200).json({ rating: ratingEntry.rating });
+  } catch (err) {
+    console.error('Error fetching user rating:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+exports.getTrendingMovies = async (req, res) => {
+  try {
+    const movies = await Movie.find().sort({ votes: -1 }).limit(10);
+    res.json({ movies });
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching trending movies" });
+  }
+};
+
+exports.getNewMovies = async (req, res) => {
+  try {
+    const movies = await Movie.find().sort({ year: -1 }).limit(10);
+    res.json({ movies });
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching new movies" });
+  }
+};
+
+exports.getRecommendedMovies = async (req, res) => {
+  try {
+    const movies = await Movie.find({ rating: { $ne: null }, votes: { $ne: null } });
+
+    const topRecommended = movies
+      .map(movie => {
+        // Simple combined score without normalization
+        const score = ((movie.votes || 0))/25000 + (movie.rating || 0) ;
+        return { ...movie._doc, score };
+      })
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 10);
+
+    res.json({ movies: topRecommended });
+  } catch (err) {
+    console.error('Error fetching recommended movies:', err);
+    res.status(500).json({ message: "Error fetching recommended movies" });
+  }
 };

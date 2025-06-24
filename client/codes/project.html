@@ -82,30 +82,68 @@
                     <div class="slide active" >
                         <h4 class="slide-title">Trending</h4>
                         <div class="image-row">
-                            <img src="https://img.englishcinemakyiv.com/gvhsMT4MMV_MrmPc8kejNbesyIS9xsxDhMTETlqzcGo/resize:fill:800:450:1:0/gravity:sm/aHR0cHM6Ly9leHBhdGNpbmVtYXByb2QuYmxvYi5jb3JlLndpbmRvd3MubmV0L2ltYWdlcy9hNjdhNzUyZi0wNzAyLTQ3NmYtYjlhOC1hODc5ZjdmMTU0ZjEuanBn.jpg" alt="Movie 1">
-                            <img src="https://img.goodfon.com/original/3840x2160/d/89/balerina-ballerina-mech-poster-eva-makarro-katana-from-the-w.jpg" alt="Movie 2">
-                            <img src="https://interplanetary.tv/wp-content/uploads/2024/12/Superman-2025-landscape-poster-2.webp" alt="Movie 3">
-                        </div>
+                            </div>
                     </div>
                     <div class="slide">
                         <h4 class="slide-title">New Releases</h4>
                         <div class="image-row">
-                            <img src="https://external-preview.redd.it/coming-to-theaters-on-may-23-2025-v0-u8BE1ujskwrrr_PP2JiGl3nWsGY3JxHVbE6CMeKBIfk.jpg?width=640&crop=smart&auto=webp&s=a6d0090866130d5eab782fa2ebd7f7af3dc627f5" alt="Movie 1">
-                            <img src="https://www.showtimenepal.com/storage/uploads/movies/2091-h.jpg" alt="Movie 2">
-                            <img src="https://img.goodfon.com/original/7680x4320/6/3f/karate-kid-legends-2025-movies-black-background-movies.jpg" alt="Movie 3">
-                        </div>
+                            </div>
                     </div>
                     <div class="slide">
                         <h4 class="slide-title">Recommended</h4>
                         <div class="image-row">
-                            <img src="https://3dvf.com/wp-content/uploads/2025/04/thunderbolts.webp" alt="Movie 1">
-                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUPXaZzampYWJ8FKPHN_3Uq8J15VNEOpHzNA&s" alt="Movie 2">
-                            <img src="https://www.filmofilia.com/wp-content/uploads/2025/04/Final-Destination-Bloodlines-1.webp" alt="Movie 3">
-                        </div>
+                            </div>
                     </div>
                     <span class="arrow left" id="prev">&#10094;</span>
                     <span class="arrow right" id="next">&#10095;</span>
-                </div>              
+                </div>   
+                <script>
+                async function loadSliderMovies() {
+                try {
+                    const sections = [
+                    { endpoint: '/api/movies/trending', selector: '.slide:nth-of-type(1) .image-row' },
+                    { endpoint: '/api/movies/new', selector: '.slide:nth-of-type(2) .image-row' },
+                    { 
+                        endpoint: '/api/users/recommended-by-genres', // 🔁 use the same as Section 2 
+                        selector: '.slide:nth-of-type(3) .image-row' 
+                    }
+                    ];
+
+                    for (const section of sections) {
+                    const response = await fetch(`http://localhost:3000${section.endpoint}`, {
+                        headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+                    const row = document.querySelector(section.selector);
+
+                    row.innerHTML = ''; 
+
+                    data.movies.slice(0, 5).forEach(movie => {
+                        const img = document.createElement('img');
+                        img.src = movie.poster_url;
+                        img.alt = movie.title;
+                        img.title = `${movie.title} (${movie.year})`;
+                        
+                        img.addEventListener('click', () => {
+                        window.location.href = `movie.html?id=${movie._id}`;
+                        });
+                        row.appendChild(img);
+                    });
+                    }
+                } catch (err) {
+                    console.error('Error loading slider movies:', err);
+                }
+                }
+
+                document.addEventListener('DOMContentLoaded', () => {
+                loadSliderMovies();
+                });
+                </script>
+           
                 <div class="section-2">
                     <script>
                         async function loadRecommendedByGenres() {

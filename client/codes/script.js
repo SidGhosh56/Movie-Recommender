@@ -161,56 +161,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-/*document.getElementById('register-form').addEventListener('submit', async (e) => {
-  e.preventDefault();  // Prevent default form submission
-
-  // Get values from the form inputs
-  const username = document.getElementById('username').value;
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
-  const confirmPassword = document.getElementById('confirmPassword').value;
-
-  // Validate the form fields (you can add more checks)
-  if (password !== confirmPassword) {
-    alert("Passwords don't match!");
-    return;
-  }
-
-  // Prepare the data to be sent to the server
-  const userData = {
-    username,
-    email,
-    password,
-    confirmPassword
-  };
-
-  try {
-    // Send a POST request to the backend API to register the user
-    const response = await fetch('http://localhost:3000/api/auth/register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(userData),
-    });
-
-    // Parse the JSON response from the backend
-    const data = await response.json();
-
-    if (response.ok) {
-      // Registration successful, show a message or redirect to login
-      alert('User registered successfully!');
-      window.location.href = 'prefer.html'; // Redirect to login page
-    } else {
-      // Show any error message from the backend
-      alert(data.message || 'Registration failed!');
-    }
-  } catch (error) {
-    console.error('Error during registration:', error);
-    alert('An error occurred. Please try again later.');
-  }
-});*/
-
 async function loadWatchedMovies() {
     const container = document.getElementById('watched-movies-list');
     try {
@@ -252,3 +202,6 @@ async function loadWatchedMovies() {
 // Load the watched movies when the page loads
 document.addEventListener('DOMContentLoaded', loadWatchedMovies);
 
+document.getElementById("darkmode-toggle").addEventListener("change", function () {
+  document.body.classList.toggle("dark-mode", this.checked);
+});

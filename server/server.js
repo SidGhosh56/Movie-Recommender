@@ -2,13 +2,15 @@ require("dotenv").config();
 const express = require('express');
 const cors = require('cors');
 const path = require("path");
-const connectDB = require('./config/db'); // ✅ load DB connection
-const movieRoutes = require('./routes/movies');
 const axios = require('axios');
+const movieRoutes = require('./routes/movies');
+const connectDB = require('./config/db'); // ✅ load DB connection
 const recommendRoute = require('./routes/recommend');
 const authRoutes = require('./routes/authRoutes'); // Import auth routes
 const userRoutes = require('./routes/userRoutes');
 const watchlistRoutes = require('./routes/watchlistRoutes'); 
+
+const Movie = require("./models/Movie");
 
 const app = express();
 connectDB(); // ✅ Connect to DB
@@ -46,7 +48,6 @@ app.get('/', (req, res) => {
 
 app.get("/test-db", async (req, res) => {
     try {
-      const Movie = require("./models/Movie");
       const count = await Movie.countDocuments();
       console.log(count);
       res.send(`✅ Total movies in DB: ${count}`);

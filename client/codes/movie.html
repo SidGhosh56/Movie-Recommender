@@ -81,7 +81,7 @@
                 <p class="no-data"></p>
             </div>
                 <div class="recommendations-section">
-                    <h2>Similar Movies</h2>
+                    <h2 class="slide-title">Similar Movies</h2>
                     <div id="recommendations-container" class="recommendations-container">
                         <p class="no-data">Loading recommendations...</p>
                     </div>
@@ -116,11 +116,37 @@
                                 <p><strong>Cast:</strong> ${Array.isArray(movie.actors) ? movie.actors.join(', ') : (movie.actors || 'N/A')}</p>
                                 <p><strong>Characters:</strong> ${Array.isArray(movie.characters) ? movie.characters.join(', ') : (movie.characters || 'N/A')}</p>
                                 <p><strong>Rating:</strong> ${movie.rating || 'N/A'}</p>
+                                <div class="user-rating-section">
+                                    <label for="user-rating"><strong>Enter Rating:</strong></label>
+                                    <input type="number" id="user-rating" min="1" max="10" step="0.1" placeholder="Rate 1–10" style="width:100px;">
+                                    <button onclick="submitRating('${movie._id}')" style="margin-left: 10px;">Submit</button>
+                                    <p id="rating-response" style="color: green;"></p>
+                                    <p id="user-rating-display"></p>
+                                </div>
                             </div>
                         </div>
                     `;
 
                     document.getElementById('selected-movie').innerHTML = movieHTML;
+
+                     // 🔄 Load the user's saved rating
+                    try {
+                        const userRatingRes = await fetch(`http://localhost:3000/api/movies/${movieId}/user-rating`, {
+                            headers: {
+                                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                            }
+                        });
+
+                        if (userRatingRes.ok) {
+                            const { rating } = await userRatingRes.json();
+                            if (rating) {
+                                document.getElementById('user-rating').value = rating;
+                                document.getElementById('user-rating-display').textContent = `Your Rating: ${rating}/10`;
+                            }
+                        }
+                    } catch (err) {
+                        console.error('Failed to load user rating:', err);
+                    }
                     }
                     catch (err) {
                     console.error('Error loading movie details:', err);
@@ -172,12 +198,12 @@
                                 <img src="${movie.poster_url || 'default_poster.jpg'}" alt="${movie.title}" />
                                 <h4>${movie.title} (${movie.year || 'N/A'})</h4>
                             </a>
-                            <p>Rating: ${movie.rating || 'N/A'}</p>
+                            <p class="rating">Rating: ${movie.rating || 'N/A'}</p>
                         `;
 
                         movieList.appendChild(movieItem);
                     });
-
+                    
                     container.appendChild(movieList);
 
                 } catch (error) {
@@ -186,7 +212,51 @@
                 }
             }
 
-            
+            async function submitRating(movieId) {
+                const rating = parseFloat(document.getElementById('user-rating').value);
+                const responseEl = document.getElementById('rating-response');
+
+                if (isNaN(rating) || rating < 1 || rating > 10) {
+                    responseEl.style.color = 'red';
+                    responseEl.textContent = 'Please enter a valid rating between 1 and 10.';
+                    return;
+                }
+
+                try {
+                    const res = await fetch(`http://localhost:3000/api/movies/${movieId}/rate`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        },
+                        body: JSON.stringify({ rating })
+                    });
+
+                    if (!res.ok) throw new Error('Failed to submit rating');
+
+                    responseEl.style.color = 'green';
+                    responseEl.textContent = 'Thank you for your rating!';
+                    // ✅ Dynamically update the "Your Rating:" section
+                    const yourRatingText = document.querySelector('#user-rating-display');
+                    if (yourRatingText) {
+                        yourRatingText.textContent = `Your Rating: ${rating}/10`;
+                    } 
+                    else {
+                        // Add display if it doesn’t exist yet
+                        const ratingDisplay = document.createElement('p');
+                        ratingDisplay.id = 'user-rating-display';
+                        ratingDisplay.textContent = `Your Rating: ${rating}/10`;
+                        document.querySelector('.movie-info').appendChild(ratingDisplay);
+                    }
+                    // Optionally disable input after submission
+                    document.getElementById('user-rating').disabled = true;
+                } catch (err) {
+                    console.error(err);
+                    responseEl.style.color = 'red';
+                    responseEl.textContent = 'Error submitting rating.';
+                }
+            }
+
             // Call function when page loads
             loadMovieDetails();
             loadSimilarMovies();
