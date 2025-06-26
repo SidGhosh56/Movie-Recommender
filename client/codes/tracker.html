@@ -144,7 +144,7 @@
                     console.log(data.message);
 
                     // Reload watched movies after removing
-                    setTimeout(loadWatchedMovies, 300);
+                    await loadWatchedMovies();
                 } catch (error) {
                     console.error('Error removing movie:', error);
                 }

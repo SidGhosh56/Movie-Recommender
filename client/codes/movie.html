@@ -123,11 +123,24 @@
                                     <p id="rating-response" style="color: green;"></p>
                                     <p id="user-rating-display"></p>
                                 </div>
+                                <div class="movie-actions">
+                                    <div class="add-option watchlist" id="add-watchlist"><strong>➕ Add to Watchlist</strong></div>
+                                    <div class="add-option watched" id="add-tracker"><strong>📌 Add to Tracker</strong></div>
+                                </div>
                             </div>
                         </div>
                     `;
 
                     document.getElementById('selected-movie').innerHTML = movieHTML;
+                    
+                    // Add event listeners after HTML is inserted
+                    document.getElementById('add-watchlist').addEventListener('click', () => {
+                        addToWatchlist(movie._id, movie.title, movie.poster_url, movie.rating);
+                    });
+
+                    document.getElementById('add-tracker').addEventListener('click', () => {
+                        addToTracker(movie.id);
+                    });
 
                      // 🔄 Load the user's saved rating
                     try {
@@ -256,7 +269,60 @@
                     responseEl.textContent = 'Error submitting rating.';
                 }
             }
+            async function addToWatchlist(id, title, poster_url, rating) {
+                        const token = localStorage.getItem('token');
+                        if (!token) {
+                            alert("Please log in to add to your watchlist.");
+                            return;
+                        }
+                        try {
+                            console.log({ id, title, poster_url, rating });
+                            const res = await fetch('http://localhost:3000/api/watchlist', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${token}`
+                                },
+                                body: JSON.stringify({id, title, poster_url, rating })
+                            });
 
+                            const data = await res.json();
+                            if (res.ok) {
+                                alert(`"${title}" added to your Watchlist!`);
+                            } else {
+                                alert(data.message || 'Failed to add to watchlist.');
+                            }
+                        } catch (err) {
+                            console.error('Error adding to watchlist:', err);
+                        }
+                    }
+
+                    async function addToTracker(movieId) {
+                        const token = localStorage.getItem('token');
+                        if (!token) {
+                            alert("Please log in to mark movies as watched.");
+                            return;
+                        }
+                        try {
+                            const res = await fetch('http://localhost:3000/api/users/tracker', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${token}`
+                                },
+                                body: JSON.stringify({ movieId })
+                            });
+
+                            const data = await res.json();
+                            if (res.ok) {
+                                alert(`Movie marked as Watched!`);
+                            } else {
+                                alert(data.error || data.message || 'Failed to add to Tracker.');
+                            }
+                        } catch (err) {
+                            console.error('Error adding to Tracker:', err);
+                        }
+                    }
             // Call function when page loads
             loadMovieDetails();
             loadSimilarMovies();

@@ -72,7 +72,7 @@
 
     <!-- Recommendations -->
     <div class="recommend">
-    <h3 class="slide2-title">Recommended Movies</h3>
+    <h3 class="slide2-title">Similar Movies You Might Like</h3>
     <div id="recommendation-row" class="rr-movies-container recommendations-row"></div>
     </div>
     </div>
@@ -128,9 +128,15 @@ if (!query) {
       return;
     }
     searchResults = data.matches;
+    const recommendedIds = new Set();
+    const searchedIds = new Set();
+
+    let recCount = 0;
 
     // Append searched movies on top
     data.matches.forEach(movie => {
+      const movieId = String(movie.id || movie._id);
+      searchedIds.add(movieId);
       const movieCard = document.createElement('div');
       movieCard.className = 'r-movie-card';
 
@@ -146,8 +152,8 @@ if (!query) {
                 <span class="s-add"> + </span>
               </button>
               <div class="s-add-menu hidden">
-                <div class="s-add-option" data-action="watchlist">Add to Watchlist</div>
-                <div class="s-add-option" data-action="tracker">Add To Tracker</div>
+                <div class="add-option watchlist" data-action="watchlist">Add to Watchlist</div>
+                <div class="add-option watched" data-action="tracker">Add To Tracker</div>
               </div>
           </div>
   `;
@@ -157,39 +163,50 @@ if (!query) {
       movieCard.setAttribute('data-rating', movie.rating);
       searchedMovieContainer.appendChild(movieCard);
 
-      // Append up to 5 recommendations below
+      // Append up to 9 recommendations below
       if (movie.recommendations && movie.recommendations.length > 0) {
-        movie.recommendations.slice(0, 5).forEach(rec => {
+        movie.recommendations.slice(0, 10).forEach(rec => {
+          const recId = String(rec.id || rec._id);
+
+          if (recCount >= 10) return;
+          if (searchedIds.has(recId) || recommendedIds.has(recId)) return; // ❌ Already added
+
+          recommendedIds.add(recId); // ✅ Mark as seen
+
           const recMovie = document.createElement('div');
           recMovie.className = 'rec-movie';
+
           const recPoster = rec.poster_url || 'default_poster.jpg';
           recMovie.innerHTML = `
-          <a href="movie.html?id=${rec.id || rec._id}">
-            <img src="${recPoster}" alt="${rec.title_with_year}">
-            <h4>${rec.title_with_year}</h4>
-            <p>Rating: ${rec.rating.toFixed(1)}</p>
+            <a href="movie.html?id=${recId}">
+              <img src="${recPoster}" alt="${rec.title_with_year}">
+              <h4>${rec.title_with_year}</h4>
+              <p>Rating: ${rec.rating.toFixed(1)}</p>
             </a>
             <div class="s-add-btn-wrapper">
               <button class="s-add-btn" title="Add to list">
                 <span class="s-add"> + </span>
               </button>
               <div class="s-add-menu hidden">
-                <div class="s-add-option" data-action="watchlist" data-id="${rec.id}">Add to Watchlist</div>
-                <div class="s-add-option" data-action="tracker" data-id="${rec.id}">Add To Tracker</div>
+                <div class="add-option watchlist" data-action="watchlist" data-id="${recId}">Add to Watchlist</div>
+                <div class="add-option watchlist" data-action="tracker" data-id="${recId}">Add To Tracker</div>
               </div>
-          </div>
+            </div>
           `;
-          recMovie.setAttribute('data-id', rec.id || rec._id);
+
+          recMovie.setAttribute('data-id', recId);
           recMovie.setAttribute('data-title', rec.title_with_year);
           recMovie.setAttribute('data-poster', rec.poster_url);
           recMovie.setAttribute('data-rating', rec.rating);
+
           recommendationRow.appendChild(recMovie);
+          recCount++;
           searchResults.push({
-      id: rec.id,
-      title_with_year: rec.title_with_year,
-      poster_url: rec.poster_url,
-      rating: rec.rating
-    });
+            id: recId,
+            title_with_year: rec.title_with_year,
+            poster_url: rec.poster_url,
+            rating: rec.rating
+          });
         });
       }
     });
@@ -301,7 +318,7 @@ document.addEventListener('click', function(event) {
                     else if (addMenu) {
                         event.stopPropagation();
 
-                        if (clicked.classList.contains('s-add-option')) {
+                        if (clicked.classList.contains('add-option')) {
                             console.log('Clicked element:', clicked);
                         const movieItem = clicked.closest('.rec-movie') || clicked.closest('.r-movie-card');
                         if (!movieItem) return;

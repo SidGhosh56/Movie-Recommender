@@ -7,7 +7,7 @@ from sklearn.decomposition import TruncatedSVD
 from sklearn.metrics.pairwise import cosine_similarity
 from pymongo import MongoClient
 from bson.objectid import ObjectId
-
+import re
 app = Flask(__name__)
 CORS(app)  # Allow requests from other domains (e.g., frontend or Node.js)
 
@@ -15,13 +15,22 @@ client = MongoClient('mongodb://localhost:27017/')  # change this if using auth
 db = client['CineVortex']   # example: 'movieDB'
 movies_collection = db['movies']
 
+def clean_text(text):
+    return re.sub(r'\W+', ' ', str(text)).lower()
+
 # === LOAD AND PREPARE DATA ===
 df = pd.read_csv("./import/project.csv")
 print(df.columns)
 df['title_with_year'] = df['title'] + " (" + df['year'].astype(str) + ")"
-df['combined_features'] = df['overview'] + " " + df['genres']
+df['title_clean'] = df['title_with_year'].apply(clean_text)
+df['combined_features'] = (
+    df['title_clean'] + " " +
+    df['title_clean'] + " " +
+    df['overview'].apply(clean_text) + " " +
+    df['director'].apply(clean_text)
+)
 
-tfidf = TfidfVectorizer(stop_words='english')
+tfidf = TfidfVectorizer(stop_words='english', ngram_range=(1, 2))
 tfidf_matrix = tfidf.fit_transform(df['combined_features'])
 
 svd = TruncatedSVD(n_components=100, random_state=42)
@@ -44,15 +53,19 @@ df['weighted_rating'] = df.apply(weighted_rating, axis=1)
 df['weighted_rating_norm'] = df['weighted_rating'] / df['weighted_rating'].max()
 
 def get_matching_titles(title):
-    matches = df[df['title'].str.lower() == title.lower()]
+    if not title:
+        return []
+
+    # Case-insensitive partial match using `str.contains`
+    matches = df[df['title'].str.contains(title, case=False, na=False)]
+
     if matches.empty:
         return []
     else:
-        # Return a list of dictionaries with title_with_year and rating for each match
-        return matches[['id','title_with_year', 'rating', 'poster_url']].drop_duplicates().to_dict(orient='records')
+        return matches[['id', 'title_with_year', 'rating', 'poster_url']].drop_duplicates().to_dict(orient='records')
 
 
-def tfidf_hybrid_recommend(title_with_year, alpha=0.6, beta=0.2, gamma=0.2, num_recommend=10, min_rating=7.0):
+def tfidf_hybrid_recommend(title_with_year, alpha=0.6, beta=0.2, gamma=0.2, num_recommend=20, min_rating=7.0):
     if title_with_year not in indices:
         return []
 
@@ -64,7 +77,11 @@ def tfidf_hybrid_recommend(title_with_year, alpha=0.6, beta=0.2, gamma=0.2, num_
 
     filtered_scores = [
         (i, score) for i, score in content_sim_scores
-        if df['rating'].iloc[i] >= min_rating and input_genres in df['genres'].iloc[i]
+        if (
+            df['rating'].iloc[i] >= 7 and
+            df['votes'].iloc[i] >= 100 and
+            input_genres in df['genres'].iloc[i]  # Optional: keep if genre relevance is needed
+        )
     ]
 
     if not filtered_scores:

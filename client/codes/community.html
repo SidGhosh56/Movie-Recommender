@@ -76,77 +76,197 @@
 
         <!-- MAIN CONTENT -->
         <div class="s-container">
-            <div class="wt-profile-box">
+            <div class="c-profile-box">
                 <h2 class="slide2-title">Community Picks: Popular Movies</h2>
             </div>
-            <div class="w-movies-container" id="top-movies-grid">
+            <div class="c-movies-container" id="top-movies-grid">
             <!-- Movies will be inserted here dynamically -->
             </div>
         </div>
         <script>
+        async function loadPopularMovies() {
+                        const container = document.getElementById('top-movies-grid');
+                        container.innerHTML = '<p>Loading popular movies...</p>';
 
-document.addEventListener("DOMContentLoaded", async () => {
-    const grid = document.getElementById("top-movies-grid");
+                        const token = localStorage.getItem('token');
 
-    const token = localStorage.getItem("token");
+                        let url = '';
+                        let headers = {
+                        'Content-Type': 'application/json'
+                        };
 
-    try {
-        let response;
-        if (token) {
-            // User is logged in → try to fetch personalized popular movies
-            response = await fetch('http://localhost:3000/api/users/popular', {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-        } else {
-            // User not logged in → fallback to global top movies
-            response = await fetch('http://localhost:3000/api/movies/top_movies');
-        }
+                        if (token) {
+                        url = 'http://localhost:3000/api/users/popular';
+                        headers['Authorization'] = `Bearer ${token}`;
+                        } else {
+                        url = 'http://localhost:3000/api/movies/most-voted'; // <-- backend route for vote-based popular movies
+                        }
 
-        if (!response.ok) throw new Error('Failed to fetch movies');
+                        try {
+                        const response = await fetch(url, { headers });
 
-        const data = await response.json();
+                        if (!response.ok) throw new Error('Failed to fetch popular movies');
 
-        // If data.movies or data.top_movies depending on the API used
-        const movies = data.movies || data.top_movies;
+                        const data = await response.json();
 
-        if (!movies || movies.length === 0) {
-            grid.innerHTML = '<p>No movies found.</p>';
-            return;
-        }
+                        if (!data.movies || data.movies.length === 0) {
+                            container.innerHTML = '<p>No popular movies found.</p>';
+                            return;
+                        }
 
-        grid.innerHTML = ''; // Clear previous content
+                        container.innerHTML = ''; // Clear loading text
 
-        movies.forEach(movie => {
-            const movieItem = document.createElement('div');
-            movieItem.classList.add('movie-card');
-            movieItem.innerHTML = `
-                <a href="movie.html?id=${movie.id || movie._id}">
-                    <img src="${movie.poster_url}" alt="${movie.title}" />
-                    <h4>${movie.title} (${movie.year})</h4>
-                </a>
-                <div class="add-btn-wrapper">
-                    <button class="add-btn" title="Add to list">
-                        <span class="add"> + </span>
-                    </button>
-                    <div class="add-menu hidden">
-                        <div class="add-option">Add to Watchlist</div>
-                        <div class="add-option">Add To Tracker</div>
-                    </div>
-                </div>
-                <p>Rating: ${movie.rating}</p>
-            `;
-            grid.appendChild(movieItem);
-        });
-    } catch (err) {
-        console.error('Error fetching movies:', err);
-        grid.innerHTML = '<p>Failed to load movies.</p>';
-    }
-});
+                        data.movies.forEach(movie => {
+                            const movieItem = document.createElement('div');
+                            movieItem.classList.add('movie-item'); 
+                            movieItem.dataset.id = movie.id || movie._id;
+                            movieItem.dataset.title = movie.title;
+                            movieItem.dataset.poster = movie.poster_url;
+                            movieItem.dataset.rating = movie.rating;
+                            movieItem.innerHTML = `
+                            <a href="movie.html?id=${movie._id}">
+                                <input type="hidden" class="movie-id" value="${movie.id || movie._id}" />
+                                <img src="${movie.poster_url || 'default-poster.jpg'}" alt="${movie.title}" />
+                                <h4>${movie.title} (${movie.year})</h4>
+                            </a>
+                            <div class="add-btn-wrapper">
+                                <button class="add-btn" title="Add to list">
+                                <span class="add"> + </span>
+                                </button>
+                                <div class="add-menu hidden">
+                                <div class="add-option">Add to Watchlist</div>
+                                <div class="add-option">Add To Tracker</div>
+                                </div>
+                            </div><br>
+                            <p>Rating: ${movie.rating}</p>
+                            `;
+                            container.appendChild(movieItem);
+                        });
 
-</script>
+                        } catch (error) {
+                        console.error(error);
+                        container.innerHTML = '<p>Failed to load popular movies.</p>';
+                        }
+                    }
+
+                    // Load on DOM ready
+                    document.addEventListener('DOMContentLoaded', loadPopularMovies);
+                    
+                    document.addEventListener('click', function(event) {
+                    const clicked = event.target;
+
+                    // Find if the clicked element is the add button or inside it
+                    const addBtn = clicked.closest('.add-btn');
+                    const addMenu = clicked.closest('.add-menu');
+
+                    // If click on the add button
+                    if (addBtn) {
+                        event.stopPropagation(); // prevent event bubbling up to document click
+
+                        const wrapper = addBtn.closest('.add-btn-wrapper');
+                        if (!wrapper) return;
+
+                        // Toggle the menu inside the wrapper
+                        const menu = wrapper.querySelector('.add-menu');
+                        if (menu) {
+                        menu.classList.toggle('hidden');
+                        }
+
+                        // Close all other open menus except this one
+                        document.querySelectorAll('.add-menu:not(.hidden)').forEach(m => {
+                        if (m !== menu) m.classList.add('hidden');
+                        });
+
+                    } 
+                    // If click inside an open menu option
+                    else if (addMenu) {
+                        event.stopPropagation();
+
+                        if (clicked.classList.contains('add-option')) {
+                            console.log('Clicked element:', clicked);
+                        const movieItem = clicked.closest('.movie-item');
+                        if (!movieItem) return;
+
+                        const id = movieItem.dataset.id;
+                        const title = movieItem.dataset.title;
+                        const poster = movieItem.dataset.poster;
+                        const rating = movieItem.dataset.rating;
+
+                        console.log(id, title, poster, rating);
+                        const option = clicked.innerText;
+                        if (option.includes('Watchlist')) {
+                            addToWatchlist(id, title, poster, rating);
+                        } else if (option.includes('Tracker')) {
+                            addToTracker(id);
+                        }
+
+                        // Close the menu after selection
+                        addMenu.classList.add('hidden');
+                        }
+                    }
+                    // Else click outside any menu or button, close all menus
+                    else {
+                        document.querySelectorAll('.add-menu:not(.hidden)').forEach(menu => {
+                        menu.classList.add('hidden');
+                        });
+                    }
+                    });
+
+                     async function addToWatchlist(id, title, poster_url, rating) {
+                        const token = localStorage.getItem('token');
+                        if (!token) {
+                            alert("Please log in to add to your watchlist.");
+                            return;
+                        }
+                        try {
+                            console.log({ id, title, poster_url, rating });
+                            const res = await fetch('http://localhost:3000/api/watchlist', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${token}`
+                                },
+                                body: JSON.stringify({id, title, poster_url, rating })
+                            });
+
+                            const data = await res.json();
+                            if (res.ok) {
+                                alert(`"${title}" added to your Watchlist!`);
+                            } else {
+                                alert(data.message || 'Failed to add to watchlist.');
+                            }
+                        } catch (err) {
+                            console.error('Error adding to watchlist:', err);
+                        }
+                    }
+
+                    async function addToTracker(movieId) {
+                        const token = localStorage.getItem('token');
+                        if (!token) {
+                            alert("Please log in to mark movies as watched.");
+                            return;
+                        }
+                        try {
+                            const res = await fetch('http://localhost:3000/api/users/tracker', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${token}`
+                                },
+                                body: JSON.stringify({ movieId })
+                            });
+
+                            const data = await res.json();
+                            if (res.ok) {
+                                alert(`Movie marked as Watched!`);
+                            } else {
+                                alert(data.error || data.message || 'Failed to add to Tracker.');
+                            }
+                        } catch (err) {
+                            console.error('Error adding to Tracker:', err);
+                        }
+                    }
+    </script>
         <!-- FOOTER -->
         <footer>
             <p>Contact Us</p>

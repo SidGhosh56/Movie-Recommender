@@ -62,14 +62,13 @@
 
         <!-- SIDEBAR -->
         <div class="side" id="sidebar">
-            <a href="watchlist.html"><div class="p1">Watchlist</div></a>
+            <a href="watchlist.html"><div class="p1"><strong>Watchlist</strong></div></a>
             <hr>
-            <a href="tracker.html"><div class="p1">Tracker</div></a>
+            <a href="tracker.html"><div class="p1"><strong>Tracker</strong></div></a>
             <hr>
-            <a href="surprise.html"><div class="p1">Surprise Me</div></a>
+            <a href="surprise.html"><div class="p1"><strong>Surprise Me</strong></div></a>
             <hr>
-            <a href="community.html"><div class="p1">Community</div></a>
-
+            <a href="community.html"><div class="p1"><strong>Community</strong></div></a>
         </div>
         
         <!-- DARK OVERLAY -->
@@ -98,107 +97,135 @@
                     <span class="arrow right" id="next">&#10095;</span>
                 </div>   
                 <script>
-                async function loadSliderMovies() {
-                try {
-                    const sections = [
-                    { endpoint: '/api/movies/trending', selector: '.slide:nth-of-type(1) .image-row' },
-                    { endpoint: '/api/movies/new', selector: '.slide:nth-of-type(2) .image-row' },
-                    { 
-                        endpoint: '/api/users/recommended-by-genres', // 🔁 use the same as Section 2 
-                        selector: '.slide:nth-of-type(3) .image-row' 
-                    }
-                    ];
+                    async function loadSliderMovies() {
+                        try {
+                        const token = localStorage.getItem('token');
 
-                    for (const section of sections) {
-                    const response = await fetch(`http://localhost:3000${section.endpoint}`, {
-                        headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                        'Content-Type': 'application/json'
+                        const sections = [
+                            { endpoint: '/api/movies/trending', selector: '.slide:nth-of-type(1) .image-row' },
+                            { endpoint: '/api/movies/new', selector: '.slide:nth-of-type(2) .image-row' },
+                            {
+                            endpoint: token
+                                ? '/api/users/recommended-by-genres'
+                                : '/api/movies/top-rated', // fallback for logged-out users
+                            selector: '.slide:nth-of-type(3) .image-row'
+                            }
+                        ];
+
+                        for (const section of sections) {
+                            const headers = {
+                            'Content-Type': 'application/json'
+                            };
+                            if (token) headers['Authorization'] = `Bearer ${token}`;
+
+                            const response = await fetch(`http://localhost:3000${section.endpoint}`, {
+                            headers
+                            });
+
+                            if (!response.ok) {
+                            console.error(`Failed to fetch from ${section.endpoint}`);
+                            continue;
+                            }
+
+                            const data = await response.json();
+                            const row = document.querySelector(section.selector);
+                            if (!row) continue;
+
+                            row.innerHTML = ''; // clear current content
+
+                            data.movies?.slice(0, 5).forEach(movie => {
+                            const img = document.createElement('img');
+                            img.src = movie.poster_url || 'default-poster.jpg';
+                            img.alt = movie.title;
+                            img.title = `${movie.title} (${movie.year})`;
+
+                            img.addEventListener('click', () => {
+                                window.location.href = `movie.html?id=${movie._id}`;
+                            });
+
+                            row.appendChild(img);
+                            });
                         }
-                    });
-
-                    const data = await response.json();
-                    const row = document.querySelector(section.selector);
-
-                    row.innerHTML = ''; 
-
-                    data.movies.slice(0, 5).forEach(movie => {
-                        const img = document.createElement('img');
-                        img.src = movie.poster_url;
-                        img.alt = movie.title;
-                        img.title = `${movie.title} (${movie.year})`;
-                        
-                        img.addEventListener('click', () => {
-                        window.location.href = `movie.html?id=${movie._id}`;
-                        });
-                        row.appendChild(img);
-                    });
+                        } catch (err) {
+                        console.error('Error loading slider movies:', err);
+                        }
                     }
-                } catch (err) {
-                    console.error('Error loading slider movies:', err);
-                }
-                }
 
-                document.addEventListener('DOMContentLoaded', () => {
-                loadSliderMovies();
-                });
+                    document.addEventListener('DOMContentLoaded', loadSliderMovies);
                 </script>
            
                 <div class="section-2">
                     <script>
-                        async function loadRecommendedByGenres() {
-                        try {
-                            const response = await fetch('http://localhost:3000/api/users/recommended-by-genres', {
-                            headers: {
-                                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                                'Content-Type': 'application/json'
-                            }
-                            });
-                            if (!response.ok) throw new Error('Failed to fetch');
-                            const data = await response.json();
-
+                         async function loadRecommendedByGenresOrTopRated() {
                             const section2 = document.querySelector('.section-2');
                             section2.innerHTML = '<h4 class="slide2-title">You Might Like</h4>';
-                            
-                            if (data.movies.length === 0) {
-                            section2.innerHTML += '<p>No recommendations available.</p>';
-                            return;
+
+                            const token = localStorage.getItem('token');
+
+                            let url = '';
+                            let headers = {
+                            'Content-Type': 'application/json'
+                            };
+
+                            if (token) {
+                            // User is logged in
+                            url = 'http://localhost:3000/api/users/recommended-by-genres';
+                            headers['Authorization'] = `Bearer ${token}`;
+                            } else {
+                            // User is not logged in — fallback to top-rated
+                            url = 'http://localhost:3000/api/movies/top-rated'; // <-- You need to create this route
                             }
-                            
+
+                            try {
+                            const response = await fetch(url, { headers });
+                            if (!response.ok) throw new Error('Failed to fetch recommendations');
+                            const data = await response.json();
+
+                            if (!data.movies || data.movies.length === 0) {
+                                section2.innerHTML += '<p>No recommendations available.</p>';
+                                return;
+                            }
+
                             const movieList = document.createElement('div');
                             movieList.classList.add('movie-list');
-                            
+
                             data.movies.forEach(movie => {
-                            const movieItem = document.createElement('div');
-                            movieItem.classList.add('movie-item');
-                            movieItem.dataset.id = movie.id || movie._id;
-                            movieItem.dataset.title = movie.title;
-                            movieItem.dataset.poster = movie.poster_url;
-                            movieItem.dataset.rating = movie.rating;
-                            movieItem.innerHTML = `
-                            <a href="movie.html?id=${movie._id}">
-                                <img src="${movie.poster_url}" alt="${movie.title}" />
-                                <h4>${movie.title} (${movie.year})</h4>
-                            </a>
+                                const movieItem = document.createElement('div');
+                                movieItem.classList.add('movie-item');
+                                movieItem.dataset.id = movie.id || movie._id;
+                                movieItem.dataset.title = movie.title;
+                                movieItem.dataset.poster = movie.poster_url;
+                                movieItem.dataset.rating = movie.rating;
+                                movieItem.innerHTML = `
+                                <a href="movie.html?id=${movie._id}">
+                                    <img src="${movie.poster_url || 'default-poster.jpg'}" alt="${movie.title}" />
+                                    <h4>${movie.title} (${movie.year})</h4>
+                                </a>
                                 <div class="add-btn-wrapper">
                                     <button class="add-btn" title="Add to list">
-                                        <span class="add"> + </span>
+                                    <span class="add"> + </span>
                                     </button>
                                     <div class="add-menu hidden">
-                                        <div class="add-option watchlist">Add to Watchlist</div>
-                                        <div class="add-option watched">Add To Tracker</div>
+                                    <div class="add-option watchlist">Add to Watchlist</div>
+                                    <div class="add-option watched">Add To Tracker</div>
                                     </div>
                                 </div>
                                 <p>Rating: ${movie.rating}</p>
-                            `;
-                            movieList.appendChild(movieItem);
+                                `;
+                                movieList.appendChild(movieItem);
                             });
-                            
+
                             section2.appendChild(movieList);
-                        } catch (err) {
-                            console.error(err);
+                            } catch (err) {
+                            console.error('Error loading movie recommendations:', err);
+                            section2.innerHTML += '<p>Error loading recommendations.</p>';
+                            }
                         }
-                        }
+
+                        // Load on page ready
+                        document.addEventListener('DOMContentLoaded', () => {
+                            loadRecommendedByGenresOrTopRated();
+                        });
 
                     </script>
                 </div>
@@ -210,13 +237,22 @@
                         const container = document.getElementById('popular-movies-list');
                         container.innerHTML = '<p>Loading popular movies...</p>';
 
+                        const token = localStorage.getItem('token');
+
+                        let url = '';
+                        let headers = {
+                        'Content-Type': 'application/json'
+                        };
+
+                        if (token) {
+                        url = 'http://localhost:3000/api/users/popular';
+                        headers['Authorization'] = `Bearer ${token}`;
+                        } else {
+                        url = 'http://localhost:3000/api/movies/most-voted'; // <-- backend route for vote-based popular movies
+                        }
+
                         try {
-                        const response = await fetch('http://localhost:3000/api/users/popular', {
-                            headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${localStorage.getItem('token')}` 
-                            }
-                        });
+                        const response = await fetch(url, { headers });
 
                         if (!response.ok) throw new Error('Failed to fetch popular movies');
 
@@ -229,7 +265,7 @@
 
                         container.innerHTML = ''; // Clear loading text
 
-                        data.movies.forEach(movie => {
+                        data.movies.slice(0, 10).forEach(movie => {
                             const movieItem = document.createElement('div');
                             movieItem.classList.add('movie-item'); 
                             movieItem.dataset.id = movie.id || movie._id;
@@ -238,17 +274,17 @@
                             movieItem.dataset.rating = movie.rating;
                             movieItem.innerHTML = `
                             <a href="movie.html?id=${movie._id}">
-                            <input type="hidden" class="movie-id" value="${movie.id || movie._id}" />
-                            <img src="${movie.poster_url}" alt="${movie.title}" />
-                            <h4>${movie.title} (${movie.year})</h4>
+                                <input type="hidden" class="movie-id" value="${movie.id || movie._id}" />
+                                <img src="${movie.poster_url || 'default-poster.jpg'}" alt="${movie.title}" />
+                                <h4>${movie.title} (${movie.year})</h4>
                             </a>
                             <div class="add-btn-wrapper">
                                 <button class="add-btn" title="Add to list">
-                                    <span class="add"> + </span>
+                                <span class="add"> + </span>
                                 </button>
                                 <div class="add-menu hidden">
-                                    <div class="add-option">Add to Watchlist</div>
-                                    <div class="add-option">Add To Tracker</div>
+                                <div class="add-option">Add to Watchlist</div>
+                                <div class="add-option">Add To Tracker</div>
                                 </div>
                             </div><br>
                             <p>Rating: ${movie.rating}</p>
@@ -261,6 +297,10 @@
                         container.innerHTML = '<p>Failed to load popular movies.</p>';
                         }
                     }
+
+                    // Load on DOM ready
+                    document.addEventListener('DOMContentLoaded', loadPopularMovies);
+
                     
                     document.addEventListener('click', function(event) {
                     const clicked = event.target;

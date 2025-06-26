@@ -2,13 +2,15 @@ const express = require("express");
 const router = express.Router();
 const auth = require('../middleware/Auth');
 
-const { getMoviesByGenre, getAllMovies, addMovie, getRandomMovie, getSurpriseMovie, getMovieById, getSimilarMovies, getTopMovies, rateMovie, getUserRating, getTrendingMovies, getNewMovies, getRecommendedMovies } = require("../controllers/movieController");
+const { getMoviesByGenre, getAllMovies, addMovie, getRandomMovie, getSurpriseMovie, getMovieById, getSimilarMovies, getTopMovies, getMostVoted, rateMovie, getUserRating, getTrendingMovies, getNewMovies, getRecommendedMovies, getTopRated } = require("../controllers/movieController");
 
 router.get('/trending', getTrendingMovies);
 router.get('/new', getNewMovies);
 router.get('/recommended', getRecommendedMovies);
 
 router.get("/by_genre", getMoviesByGenre);
+router.get('/top-rated', getTopRated);
+router.get('/most-voted', getMostVoted);
 router.get("/", getAllMovies);
 router.post("/", addMovie);
 router.get("/random", getRandomMovie);

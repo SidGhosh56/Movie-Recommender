@@ -85,10 +85,10 @@
             <a href="movie.html?id=${movie._id}">
                 <img id="movie-poster" src="" alt="Movie Poster">
                 <h3 id="movie-title"></h3>
+            </a>
                 <p><strong>Rating:</strong><span id="movie-rating"></span></p>
                 <p><strong>Genre:</strong> <span id="movie-genre"></span></p>
                 <p id="movie-description"></p>
-            </a>
                 <button id="anotherBtn">Another One</button>
                 <div class="s-add-btn-wrapper">
               <button class="s-add-btn" title="Add to list">
@@ -105,175 +105,175 @@
         </div>
         <script>
             const surpriseBtn = document.getElementById("surpriseBtn");
-const anotherBtn = document.getElementById("anotherBtn");
-const movieCard = document.getElementById("s-movie-card");
+            const anotherBtn = document.getElementById("anotherBtn");
+            const movieCard = document.getElementById("s-movie-card");
 
-surpriseBtn.addEventListener("click", fetchRandomMovie);
-anotherBtn.addEventListener("click", fetchRandomMovie);
-let currentMovie = null; 
-async function fetchRandomMovie() {
-      const token = localStorage.getItem("token");  // check if user is logged in
-      let url = "";
+            surpriseBtn.addEventListener("click", fetchRandomMovie);
+            anotherBtn.addEventListener("click", fetchRandomMovie);
+            let currentMovie = null; 
+            async function fetchRandomMovie() {
+                  const token = localStorage.getItem("token");  // check if user is logged in
+                  let url = "";
 
-      if (token) {
-          // User is logged in → personalized surprise
-          url = "http://localhost:3000/api/movies/surprise";
-      } else {
-          // User is not logged in → generic random movie
-          url = "http://localhost:3000/api/movies/random";
-      }
+                  if (token) {
+                      // User is logged in → personalized surprise
+                      url = "http://localhost:3000/api/movies/surprise";
+                  } else {
+                      // User is not logged in → generic random movie
+                      url = "http://localhost:3000/api/movies/random";
+                  }
 
-      try {
-        const res = await fetch(url, {
-            headers: token ? { 'Authorization': `Bearer ${token}` } : {}  // send token if logged in
-        });
+                  try {
+                    const res = await fetch(url, {
+                        headers: token ? { 'Authorization': `Bearer ${token}` } : {}  // send token if logged in
+                    });
 
-        if (!res.ok) {
-            throw new Error("Failed to fetch movie.");
-        }
-        const movie = await res.json();
-        currentMovie = movie;
-        document.getElementById("movie-poster").src = movie.poster_url;
-        document.getElementById("movie-title").textContent = movie.title;
-        document.getElementById("movie-genre").textContent = movie.genres;
-        document.getElementById("movie-description").textContent = movie.overview;
-        document.getElementById("movie-rating").textContent = movie.rating;
-        document.querySelector("#s-movie-card a").href = `movie.html?id=${movie._id}`;
+                    if (!res.ok) {
+                        throw new Error("Failed to fetch movie.");
+                    }
+                    const movie = await res.json();
+                    currentMovie = movie;
+                    document.getElementById("movie-poster").src = movie.poster_url;
+                    document.getElementById("movie-title").textContent = movie.title;
+                    document.getElementById("movie-genre").textContent = movie.genres;
+                    document.getElementById("movie-description").textContent = movie.overview;
+                    document.getElementById("movie-rating").textContent = movie.rating;
+                    document.querySelector("#s-movie-card a").href = `movie.html?id=${movie._id}`;
 
-        movieCard.style.display = "block";
-        document.getElementById("surpriseBtn").style.display = "none";
-        
-      } catch (err) {
-          alert("Failed to fetch movie. Is the backend running?");
-      }
-  }
- document.addEventListener('click', function(e) {
-    const clicked = e.target;
+                    movieCard.style.display = "block";
+                    document.getElementById("surpriseBtn").style.display = "none";
+                    
+                  } catch (err) {
+                      alert("Failed to fetch movie. Is the backend running?");
+                  }
+              }
+            document.addEventListener('click', function(e) {
+                const clicked = e.target;
 
-    // 1️⃣ Check if click was inside add-btn → toggle menu
-    const btnWrapper = clicked.closest('.s-add-btn-wrapper');
+                // 1️⃣ Check if click was inside add-btn → toggle menu
+                const btnWrapper = clicked.closest('.s-add-btn-wrapper');
 
-    if (btnWrapper && clicked.closest('.s-add-btn')) {
-        console.log('Add button clicked');
-        e.stopPropagation(); // prevent bubbling
+                if (btnWrapper && clicked.closest('.s-add-btn')) {
+                    console.log('Add button clicked');
+                    e.stopPropagation(); // prevent bubbling
 
-        const menu = btnWrapper.querySelector('.s-add-menu');
-        menu.classList.toggle('hidden');
+                    const menu = btnWrapper.querySelector('.s-add-menu');
+                    menu.classList.toggle('hidden');
 
-        // Close any other open menus
-        document.querySelectorAll('.s-add-menu').forEach(otherMenu => {
-            if (otherMenu !== menu) {
-                otherMenu.classList.add('hidden');
+                    // Close any other open menus
+                    document.querySelectorAll('.s-add-menu').forEach(otherMenu => {
+                        if (otherMenu !== menu) {
+                            otherMenu.classList.add('hidden');
+                        }
+                    });
+                    return;
+                }
+
+                // 2️⃣ Check if clicked on an option → perform action
+                if (clicked.classList.contains('s-add-menu-item')) {
+                    e.stopPropagation();
+                    const action = clicked.dataset.action;
+
+                    if (!currentMovie) {
+                        alert("No movie selected yet!");
+                        return;
+                    }
+
+                    document.getElementById('s-movie-card').dataset.movieId = currentMovie._id;
+                    document.getElementById('s-movie-card').dataset.moviePoster = currentMovie.poster_url;
+                    document.getElementById('s-movie-card').dataset.movieTitle = currentMovie.title;
+                    document.getElementById('s-movie-card').dataset.movieGenres = currentMovie.genres;
+                    document.getElementById('s-movie-card').dataset.movieOverview = currentMovie.overview;
+                    document.getElementById('s-movie-card').dataset.movieRating = currentMovie.rating;
+
+                    console.log(`Adding movie ${currentMovie._id} to ${action}`);
+
+                    if (action === 'watchlist') {
+                        addToWatchlist(currentMovie);
+                    } else if (action === 'tracker') {
+                        addToTracker(currentMovie);
+                    }
+
+                    // Close all menus
+                    document.querySelectorAll('.s-add-menu').forEach(menu => menu.classList.add('hidden'));
+
+                    return; // Done
+                }
+
+                // 3️⃣ If clicked anywhere else → close all menus
+                document.querySelectorAll('.s-add-menu').forEach(menu => menu.classList.add('hidden'));
+            });
+
+
+            async function addToWatchlist(movie) {
+              const token = localStorage.getItem('token'); // JWT stored after login
+
+              if (!token) {
+                alert("Please log in to add to your watchlist.");
+                return;
+              }
+
+              try {
+                const res = await fetch('http://localhost:3000/api/watchlist', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,// Include JWT here
+                    'Cache-Control': 'no-cache'  
+                  },
+                  body: JSON.stringify({
+                    id: movie._id,               // Your unique movie id attribute
+                    title: movie.title,
+                    poster_url: movie.poster_url,
+                    rating: movie.rating
+                  })
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                  alert('Added to watchlist!');
+                  loadWatchlist();
+                } else {
+                  alert(data.message || 'Failed to add to watchlist.');
+                }
+              } catch (err) {
+                console.error('Error adding to watchlist:', err);
+              }
             }
-        });
-        return;
-    }
+            async function addToTracker(movie) {
+              const token = localStorage.getItem('token'); // JWT stored after login
 
-    // 2️⃣ Check if clicked on an option → perform action
-    if (clicked.classList.contains('s-add-menu-item')) {
-        e.stopPropagation();
-        const action = clicked.dataset.action;
+              if (!token) {
+                alert("Please log in to add to your tracker.");
+                return;
+              }
 
-        if (!currentMovie) {
-            alert("No movie selected yet!");
-            return;
-        }
+              try {
+                const res = await fetch('http://localhost:3000/api/users/tracker', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                  },
+                  body: JSON.stringify({
+                    movieId: movie.id,
+                    title: movie.title,
+                    poster_url: movie.poster_url,
+                    rating: movie.rating
+                  })
+                });
 
-        document.getElementById('s-movie-card').dataset.movieId = currentMovie._id;
-        document.getElementById('s-movie-card').dataset.moviePoster = currentMovie.poster_url;
-        document.getElementById('s-movie-card').dataset.movieTitle = currentMovie.title;
-        document.getElementById('s-movie-card').dataset.movieGenres = currentMovie.genres;
-        document.getElementById('s-movie-card').dataset.movieOverview = currentMovie.overview;
-        document.getElementById('s-movie-card').dataset.movieRating = currentMovie.rating;
-
-        console.log(`Adding movie ${currentMovie._id} to ${action}`);
-
-        if (action === 'watchlist') {
-            addToWatchlist(currentMovie);
-        } else if (action === 'tracker') {
-            addToTracker(currentMovie);
-        }
-
-        // Close all menus
-        document.querySelectorAll('.s-add-menu').forEach(menu => menu.classList.add('hidden'));
-
-        return; // Done
-    }
-
-    // 3️⃣ If clicked anywhere else → close all menus
-    document.querySelectorAll('.s-add-menu').forEach(menu => menu.classList.add('hidden'));
-});
-
-
-async function addToWatchlist(movie) {
-  const token = localStorage.getItem('token'); // JWT stored after login
-
-  if (!token) {
-    alert("Please log in to add to your watchlist.");
-    return;
-  }
-
-  try {
-    const res = await fetch('http://localhost:3000/api/watchlist', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,// Include JWT here
-        'Cache-Control': 'no-cache'  
-      },
-      body: JSON.stringify({
-        id: movie._id,               // Your unique movie id attribute
-        title: movie.title,
-        poster_url: movie.poster_url,
-        rating: movie.rating
-      })
-    });
-
-    const data = await res.json();
-    if (res.ok) {
-      alert('Added to watchlist!');
-      loadWatchlist();
-    } else {
-      alert(data.message || 'Failed to add to watchlist.');
-    }
-  } catch (err) {
-    console.error('Error adding to watchlist:', err);
-  }
-}
-async function addToTracker(movie) {
-  const token = localStorage.getItem('token'); // JWT stored after login
-
-  if (!token) {
-    alert("Please log in to add to your tracker.");
-    return;
-  }
-
-  try {
-    const res = await fetch('http://localhost:3000/api/users/tracker', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        movieId: movie.id,
-        title: movie.title,
-        poster_url: movie.poster_url,
-        rating: movie.rating
-      })
-    });
-
-    const data = await res.json();
-    if (res.ok) {
-      alert('Added to tracker!');
-      // Optionally, reload tracker or update UI here
-    } else {
-      alert(data.message || 'Failed to add to tracker.');
-    }
-  } catch (err) {
-    console.error('Error adding to tracker:', err);
-  }
-}
+                const data = await res.json();
+                if (res.ok) {
+                  alert('Added to tracker!');
+                  // Optionally, reload tracker or update UI here
+                } else {
+                  alert(data.message || 'Failed to add to tracker.');
+                }
+              } catch (err) {
+                console.error('Error adding to tracker:', err);
+              }
+            }
 
         </script>
         <!-- FOOTER -->

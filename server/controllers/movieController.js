@@ -20,20 +20,31 @@ exports.addMovie = async (req, res) => {
 };
 
 exports.getRandomMovie = async (req, res) => {
-    try {
-        const count = await Movie.countDocuments(); // Get the total number of movies
-        const randomIndex = Math.floor(Math.random() * count); // Generate a random index
-        const randomMovie = await Movie.findOne().skip(randomIndex); // Get the movie at that index
-        
-        if (!randomMovie) {
-            return res.status(404).json({ error: "No movies found" });
-        }
+  try {
+    const filter = {
+      votes: { $gte: 400 },
+      rating: { $gte: 7.5 }
+    };
 
-        res.json(randomMovie); // Return the random movie
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+    const count = await Movie.countDocuments(filter);
+
+    if (count === 0) {
+      return res.status(404).json({ error: "No suitable movies found" });
     }
+
+    const randomIndex = Math.floor(Math.random() * count);
+    const randomMovie = await Movie.findOne(filter).skip(randomIndex);
+
+    if (!randomMovie) {
+      return res.status(404).json({ error: "Random movie not found" });
+    }
+
+    res.json(randomMovie);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
+
 
 exports.getSurpriseMovie = async (req, res) => {
     try {
@@ -92,16 +103,14 @@ exports.getMoviesByGenre = async (req, res) => {
     }
 
     const genres = genresQuery.split(',').map(g => g.trim());
-
-    // Create an array of regex filters, one for each genre
     const genreRegexes = genres.map(g => new RegExp(`\\b${g}\\b`, 'i'));
 
-    // Query for movies where 'genres' string matches any of these regexes
     const movies = await Movie.find({ 
-      $or: genreRegexes.map(regex => ({ genres: regex })) 
+      $or: genreRegexes.map(regex => ({ genres: regex })),
+      votes: { $gte: 100 } 
     })
-    .sort({ rating: -1, popularity: -1, votes: -1 })  // descending order
-    .limit(10);
+    .sort({ rating: -1, votes: -1 })  // prioritize high-rated and well-voted
+    .limit(10);  // you can increase from 10 to 20 if needed for UI
 
     if (movies.length === 0) {
       return res.status(404).json({ message: 'No movies found for selected genres.' });
@@ -135,7 +144,7 @@ exports.getRecommendedByGenres = async (req, res) => {
       {
         $match: {
           $or: genreRegexes.map(regex => ({ genres: regex })),
-          votes: { $gte: m }
+          votes: { $gte: m },
         }
       },
       {
@@ -159,6 +168,18 @@ exports.getRecommendedByGenres = async (req, res) => {
       }
     };
 
+exports.getTopRated = async (req, res) => {
+  try {
+    const topRatedMovies = await Movie.find({ rating: { $gte: 7.5 }, votes: { $gte: 300 } })
+                                      .sort({ rating: -1 })
+                                      .limit(10);
+    res.status(200).json({ movies: topRatedMovies });
+  } catch (err) {
+    console.error('Error fetching top-rated movies:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 exports.getPopularMovies = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
@@ -166,10 +187,9 @@ exports.getPopularMovies = async (req, res) => {
 
     const favoriteGenres = user.genres;
     if (!favoriteGenres || favoriteGenres.length === 0) {
-      // fallback: return globally popular movies if user has no favorite genres
       const movies = await Movie.find()
-        .sort({ popularity: -1, votes: -1 })
-        .limit(10);
+        .sort({ votes: -1 })
+        .limit(24);
       return res.json({ movies });
     }
 
@@ -179,7 +199,7 @@ exports.getPopularMovies = async (req, res) => {
       $or: genreRegexes.map(regex => ({ genres: regex }))
     })
       .sort({ votes: -1, popularity: -1})
-      .limit(10);
+      .limit(24);
 
     if (movies.length === 0) {
       return res.status(404).json({ message: 'No popular movies found for your favorite genres.' });
@@ -187,6 +207,17 @@ exports.getPopularMovies = async (req, res) => {
 
     res.json({ movies });
   } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+exports.getMostVoted = async (req, res) => {
+  try {
+    const popularByVotes = await Movie.find({ votes: { $gte: 50 } }) // you can tweak this threshold
+                                     .sort({ votes: -1 })
+                                     .limit(24);
+    res.status(200).json({ movies: popularByVotes });
+  } catch (error) {
+    console.error('Error fetching most voted movies:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -243,7 +274,7 @@ exports.getSimilarMovies = async (req, res) => {
     // Build query
     const query = {
       _id: { $ne: movie._id },
-      $text: { $search: overviewSearch },
+      $text: { $search: `${movie.title} ${overviewSearch}` },
       rating: { $gte: 7, $lte: 9 }
     };
 
@@ -274,10 +305,15 @@ exports.getSimilarMovies = async (req, res) => {
       }
 
       // Title similarity (word overlap)
-      const titleWords = movie.title.toLowerCase().split(/\s+/);
+      const stopWords = new Set(['the', 'a', 'an', 'of', 'and', 'in', 'on', 'with', 'to', 'from', 'by']);
+      const titleWords = movie.title.toLowerCase().split(/\s+/).filter(word => !stopWords.has(word));
       const candidateTitle = (candidate.title || "").toLowerCase();
-      const commonTitleWords = titleWords.filter(word => candidateTitle.includes(word));
-      boost += commonTitleWords.length * 1.5;
+
+      let titleOverlap = 0;
+      titleWords.forEach(word => {
+        if (candidateTitle.includes(word)) titleOverlap += 1;
+      });
+      boost += titleOverlap * 3;
 
       return { ...candidate, score: boost };
     });

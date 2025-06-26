@@ -39,7 +39,7 @@ document.getElementById("prev")?.addEventListener("click", prevSlide);
 
 // Auto slide
 function startSlideShow() {
-    slideInterval = setInterval(nextSlide, 10000);
+    slideInterval = setInterval(nextSlide, 40000);
 }
 
 function stopSlideShow() {
@@ -160,47 +160,6 @@ document.addEventListener('DOMContentLoaded', () => {
     yearSelect.appendChild(option);
   }
 });
-
-async function loadWatchedMovies() {
-    const container = document.getElementById('watched-movies-list');
-    try {
-        const response = await fetch('http://localhost:3000/api/users/tracker', {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) throw new Error('Failed to fetch watched movies');
-
-        const data = await response.json();
-
-        if (!data.watchedMovies || data.watchedMovies.length === 0) {
-            container.innerHTML = '<p class="no-data">You haven\'t tracked any movies yet. Start watching to see your stats!</p>';
-            return;
-        }
-
-        container.innerHTML = '';
-        data.watchedMovies.forEach(item => {
-            const movieItem = document.createElement('div');
-            movieItem.classList.add('movie-item');
-            movieItem.innerHTML = `
-                <img src="${item.poster_url}" alt="${item.title}" style="width:150px; height:auto; border-radius:10px;" />
-                <h4>${item.title}</h4>
-                <p>Watched on: ${new Date(item.watchedAt).toLocaleDateString()}</p>
-                <hr>
-            `;
-            container.appendChild(movieItem);
-        });
-
-    } catch (err) {
-        console.error(err);
-        container.innerHTML = '<p class="no-data">Failed to load watched movies.</p>';
-    }
-}
-
-// Load the watched movies when the page loads
-document.addEventListener('DOMContentLoaded', loadWatchedMovies);
 
 document.getElementById("darkmode-toggle").addEventListener("change", function () {
   document.body.classList.toggle("dark-mode", this.checked);

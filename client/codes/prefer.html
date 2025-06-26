@@ -65,9 +65,11 @@
                 <!-- Genres checkboxes will be rendered here -->
                 </div>
 
-                <h3 >Select 3 Favorite Movies</h3>
-                <div id="moviesContainer">
-                <!-- Movies checkboxes will be rendered here -->
+                <div id="moviesSection" style="display: none;">
+                  <h3 class="slide-title">Select 3 Favorite Movies</h3>
+                  <div id="moviesContainer">
+                    <!-- Movies checkboxes will be rendered here -->
+                  </div>
                 </div>
 
                 <button type="submit">Save Preferences</button>
@@ -91,32 +93,38 @@
 
     // When genres change, fetch movies from backend for selected genres
     genresContainer.addEventListener('change', async () => {
-      const selectedGenres = [...document.querySelectorAll('input[name="genres"]:checked')].map(cb => cb.value);
-      if (selectedGenres.length === 0) {
-        moviesContainer.innerHTML = 'Please select at least one genre';
-        return;
-      }
-      // Fetch movies from your backend
-      try {
-        const response = await fetch(`http://localhost:3000/api/movies/by_genre?genres=${encodeURIComponent(selectedGenres.join(','))}`);
-        const data = await response.json();
+  const selectedGenres = [...document.querySelectorAll('input[name="genres"]:checked')].map(cb => cb.value);
+  const moviesSection = document.getElementById('moviesSection');
 
-        if (response.ok) {
-          // Display movie checkboxes, limit to e.g. 20
-          moviesContainer.innerHTML = '';
-          data.movies.slice(0, 20).forEach(movie => {
-            const label = document.createElement('label');
-            label.innerHTML = `<input type="checkbox" name="movies" value="${movie._id}" /> ${movie.title}`;
-            moviesContainer.appendChild(label);
-            moviesContainer.appendChild(document.createElement('br'));
-          });
-        } else {
-          moviesContainer.innerHTML = 'No movies found for selected genres.';
-        }
-      } catch (error) {
-        moviesContainer.innerHTML = 'Error fetching movies.';
-      }
-    });
+  if (selectedGenres.length === 0) {
+    moviesSection.style.display = 'none';
+    moviesContainer.innerHTML = 'Please select at least one genre';
+    return;
+  } else {
+    moviesSection.style.display = 'block';
+  }
+
+  // Fetch movies from backend
+  try {
+    const response = await fetch(`http://localhost:3000/api/movies/by_genre?genres=${encodeURIComponent(selectedGenres.join(','))}`);
+    const data = await response.json();
+
+    if (response.ok) {
+      moviesContainer.innerHTML = '';
+      data.movies.slice(0, 10).forEach(movie => {
+        const label = document.createElement('label');
+        label.innerHTML = `<input type="checkbox" name="movies" value="${movie._id}" /> ${movie.title}`;
+        moviesContainer.appendChild(label);
+        moviesContainer.appendChild(document.createElement('br'));
+      });
+    } else {
+      moviesContainer.innerHTML = 'No movies found for selected genres.';
+    }
+  } catch (error) {
+    moviesContainer.innerHTML = 'Error fetching movies.';
+  }
+});
+
 
     document.getElementById('preferencesForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -128,8 +136,8 @@
         alert('Please select at least one genre.');
         return;
       }
-      if (selectedMovies.length !== 3) {
-        alert('Please select exactly 3 favorite movies.');
+      if (selectedMovies.length < 3) {
+        alert('Please select 3 or favorite movies.');
         return;
       }
 

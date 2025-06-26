@@ -187,6 +187,7 @@
 
                     movieDiv.remove();
                     checkWatchlistButtonVisibility();
+                    await loadWatchlist();
                     } catch (err) {
                         console.error(err);
                         alert('Error removing movie. Try again.');

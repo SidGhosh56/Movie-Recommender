@@ -104,6 +104,7 @@ h1 {
     margin-right: auto;
     display: flex;
     align-items: center;
+    color:  #00ffff;
 }
 
 /* Profile Image */
@@ -126,7 +127,7 @@ img {
 
 .side {
     position: fixed;
-    top: 70px; /* adjust based on your header height */
+    top: 76.5px; 
     left: -170px; /* hide it initially */
     width: 150px;
     height: calc(100vh - 150px);
@@ -142,6 +143,13 @@ img {
     left: 0;
 }
 
+.p1 {
+  display: flex;
+  justify-content: center;  /* centers horizontally */
+  align-items: center;      /* centers vertically */
+  height: 50px;             /* adjust as needed */
+  text-align: center;
+}
 
 hr{
     width: 100%;
@@ -277,6 +285,7 @@ hr{
     height: 300px;
     text-align: left;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    color: #3e0f67;
 }
 
 .movie-item:hover {
@@ -573,7 +582,7 @@ button#surpriseBtn, button#anotherBtn {
   text-align: center;
   max-width: 200px;
   width: 100%;
-  color: white;
+  color:  #00ffff;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -1036,6 +1045,12 @@ input[type="email"] {
     margin-top: 5px;
 }
 
+.c-movies-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 20px;
+}
+
 .floating-add-btn {
   position: fixed;
   bottom: 70px;
@@ -1350,7 +1365,7 @@ input[type="email"] {
   text-align: center;
   max-width: 180px;
   width: 100%;
-  color: white;
+  color:  #00ffff;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -1372,12 +1387,13 @@ input[type="email"] {
 .w-movie-card .movie-info h3 {
     font-size: 16px;
     margin: 8px 0 4px;
+    color:  #00ffff;
 }
 
 .w-movie-card .movie-info p {
     margin: 4px 0;
     font-size: 14px;
-    color: #555;
+    color:  #953df3;
 }
 
 #search-query-text {
@@ -1407,4 +1423,48 @@ input[type="email"] {
 .dark-mode {
   background-image: url('https://img.freepik.com/free-vector/modern-dark-texture-background_1035-11632.jpg');
   color: #ffffff;
+}
+
+#genresContainer label, #moviesContainer label {
+    color: #3e0f67; /* Replace with your desired color */
+    font-weight: bold; /* Optional: to make text stand out */
+  }
+
+#errorMessage {
+  color: #e53935;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+a {
+  text-decoration: none;     
+  color: inherit;            
+}
+
+a:visited,
+a:hover,
+a:focus,
+a:active {
+  text-decoration: none;    
+  color: inherit;           
+  outline: none;             
+}
+
+.movie-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 15px;
+}
+
+.add-option {
+  background-color: white;
+  color: #3e0f67;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.add-option:hover {
+  background-color: #00ffff;
 }

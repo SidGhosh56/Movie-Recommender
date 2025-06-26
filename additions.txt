@@ -1,11 +1,2 @@
-Fill In Sections 2 and 3 for Popular people
-No repeated movies in recommended section
-Settings Page -> Change Username, Email etc option
-Slider Options for Sections 2 and 3
-Name of Tracker (As Completed)
-Selection of 3 movies for new registration
-Font Colour for preferences page
-Perfecting the suggestions for movie page
-Change font color and background color of the search and recommended
-Search by director, cast [Optional]
-Perfect Community Page
+If genres more than 1, keep current, else just use one
+Settings Page final

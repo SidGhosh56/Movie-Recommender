@@ -54,38 +54,38 @@
 
         </div>
 
-    <div class="settings-box">
-      <h2 class="slide2-title">Settings</h2>
-      <div class="setting-section" id="account-section">
-        <h3 class="settings">Account Info</h3>
-        <label for="email-input" class="rating">Email:
-          <input type="email" id="email-input" />
-        </label>
-        <label for="username-input" class="rating">Username:
-          <input type="text" id="username-input" />
-        </label>
-      </div>
+        <div class="settings-box">
+        <h2 class="slide2-title">Settings</h2>
 
-      <div class="setting-section" id="preferences-section">
-        <h3 class="settings">Preferences</h3>
+        <!-- ACCOUNT SETTINGS -->
+        <div class="setting-section" id="account-section">
+          <h3 class="settings">Account</h3>
+
+          <label for="email-input" class="rating">Email:
+            <input type="email" id="email-input" />
+          </label>
+
+          <label for="username-input" class="rating">Username:
+            <input type="text" id="username-input" />
+          </label>
+
+          <button class="small-btn">Change Password</button>
+        </div>
+
+        <!-- PREFERENCES -->
+        <div class="setting-section" id="preferences-section">
+          <h3 class="settings">Site Preferences</h3>
+
           <label for="darkmode-toggle" class="dark-mode">
             <input type="checkbox" id="darkmode-toggle" />
-             Enable Dark Mode
+            Enable Dark Mode
           </label>
-      </div>
+        </div>
 
-      <div class="setting-section" id="notifications-section">
-        <h3 class="settings">Notifications</h3>
-        <label for="email-notif" class="rating">
-         <input type="checkbox" id="email-notif" checked />
-         Email Notifications
-        </label>
-      </div>
-
-      <button id="save-btn">Save Changes</button>
-      <p id="save-status"></p>
-    </div>
-    
+        <!-- SAVE -->
+        <button id="save-btn">Save Changes</button>
+        <p id="save-status"></p>
+        </div>
 
     <footer>
       <p>Contact Us</p>
