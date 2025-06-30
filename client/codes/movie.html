@@ -103,7 +103,7 @@
                     const movie = await response.json();
                     const movieHTML = `
                         <div class = "movie-head"> 
-                            <h1>${movie.title}</h1>
+                            <h1 >${movie.title}</h1>
                             <p><strong>Director:</strong> ${movie.director || 'N/A'} &nbsp; | &nbsp; <strong>Release Year:</strong> ${movie.year || 'N/A'}</p>
                         </div>
                         <div class="movie-content">
@@ -124,8 +124,8 @@
                                     <p id="user-rating-display"></p>
                                 </div>
                                 <div class="movie-actions">
-                                    <div class="add-option watchlist" id="add-watchlist"><strong>➕ Add to Watchlist</strong></div>
-                                    <div class="add-option watched" id="add-tracker"><strong>📌 Add to Tracker</strong></div>
+                                    <div class="add-option-m watchlist" id="add-watchlist"><strong>➕ Add to Watchlist</strong></div>
+                                    <div class="add-option-m watched" id="add-tracker"><strong>📌 Add to Tracker</strong></div>
                                 </div>
                             </div>
                         </div>

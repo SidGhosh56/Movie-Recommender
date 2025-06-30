@@ -105,6 +105,7 @@ exports.getWatchedMovies = async (req, res) => {
       .sort((a, b) => b.watchedAt - a.watchedAt)
       .map((entry) => {
         const movie = entry.movieId;  // populated movie document
+        const ratingEntry = user.ratings.find(r => r.movieId.toString() === movie._id.toString());
 
         // Check if movie exists (not null)
         if (!movie) return null;
@@ -114,7 +115,7 @@ exports.getWatchedMovies = async (req, res) => {
           title: movie.title,
           poster_url: movie.poster_url,
           year: movie.year,
-          rating: movie.rating,
+          userRating: ratingEntry ? ratingEntry.rating : null, // <-- user’s personal rating
           watchedAt: entry.watchedAt
         };
       })
@@ -166,6 +167,37 @@ exports.getCurrentUser = async (req, res) => {
     res.status(200).json(userData);
   } catch (error) {
     console.error('Error fetching current user:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.getUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id)
+      .populate('favoriteMovies', 'title'); // Only fetch titles
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    res.json(user);
+  } catch (error) {
+    console.error('Get user error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.updateUser = async (req, res) => {
+  try {
+    const updates = {
+      email: req.body.email,
+      username: req.body.username
+    };
+
+    const updatedUser = await User.findByIdAndUpdate(req.params.id, updates, { new: true });
+
+    if (!updatedUser) return res.status(404).json({ message: 'User not found' });
+
+    res.json(updatedUser);
+  } catch (error) {
+    console.error('Update user error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

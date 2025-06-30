@@ -86,7 +86,18 @@ document.getElementById('registerBtn').addEventListener('click', async () => {
     alert('Please fill in all fields');
     return;
   }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    alert('Please enter a valid email address.');
+    return;
+  }
 
+  // Password strength validation
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+  if (!passwordRegex.test(password)) {
+    alert('Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, and one number.');
+    return;
+  }
   if (password !== confirmPassword) {
     alert("Passwords do not match!");
     return;

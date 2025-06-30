@@ -19,7 +19,7 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 8px 20px;
-    background: #222;
+    background: #092b62;
     height: 60px;
     position: relative;
     z-index: 10;
@@ -36,16 +36,17 @@ body {
 
 
 h1 {
-    font-size: 38px;
-    font-weight: 700;
+    font-size: 40px;
+    font-weight: 1200;
     margin:0;
     border-radius: 30px;
     background: linear-gradient(to right, rgb(226, 137, 137), aqua);
     background-clip: text;
     -webkit-background-clip: text;
     color: transparent;
-    text-shadow: 1px 1px rgba(0, 0, 0, 0.31);
+    text-shadow: 1px 1px rgba(66, 64, 64, 0.31);
     white-space: nowrap;
+    font-family: 'Times New Roman', Times, serif;
 }
 
 /* Search Bar */
@@ -102,6 +103,7 @@ h1 {
 .home-container {
     margin-left: 15px;
     margin-right: auto;
+    padding-top: 4px;
     display: flex;
     align-items: center;
     color:  #00ffff;
@@ -169,7 +171,8 @@ hr{
     padding: 5px;
     /*background-color: rgb(81, 14, 81);*/
     /*background-color: rgb(121, 212, 228);*/
-    background-image: url('https://img.freepik.com/premium-photo/beautiful-vintage-light-blue-background-wall-paint-decoration-backdrop_1962-1378.jpg');
+    background-image: url('https://i.pinimg.com/736x/22/f8/97/22f897c1f050222d00c901c4a7e64481.jpg');
+    /*background-image: url('https://i.pinimg.com/736x/0a/a4/d8/0aa4d84a8b366f6b99086e78b4374529.jpg');*/
     overflow-y: auto;
     min-height: unset; 
 }
@@ -230,17 +233,19 @@ hr{
 
 .slide-title {
   font-size: 32px;
-  color: #3e0f67;
+  color: #0b3e8a;
   text-align: center; /* optional, for better alignment */
   padding-bottom: 10px; 
   padding-top: 0px;
   margin-top: 1px;
   margin-bottom: 8px;
+  font-family: 'Times New Roman', Georgia, Times, serif;
 }
 
 .slide2-title {
   font-size: 30px;
-  color: #360b5c;
+  color: #0b3e8a;
+  font-family: 'Times New Roman', Georgia, Times, serif;
   text-align: center; /* optional, for better alignment */
   padding-bottom: 10px; 
   padding-top: 8px;
@@ -290,7 +295,7 @@ hr{
 
 .movie-item:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(255, 79, 79, 0.3);
+    box-shadow: 0 8px 20px rgb(34, 136, 225);
 }
 
 .movie-item img {
@@ -306,7 +311,9 @@ footer{
   color: rgb(204, 146, 212);
   text-align: right;
   padding: 4px 10px;
-  flex-shrink: 0;         
+  flex-shrink: 0;
+  color: #31cad5;
+  font-family: 'Times New Roman', Georgia, Times, serif;  
 }
 #root {
   display: flex;
@@ -440,6 +447,7 @@ footer{
     margin-top: 15px;
     font-size: 14px;
     color: #ccc;
+  font-family: 'Times New Roman', Georgia, Times, serif;
   }
   
   .register-link a {
@@ -514,6 +522,7 @@ footer{
     box-shadow: 0px 0px 12px rgba(0,0,0,0.4);
     text-align: center;
     color: #fff;
+  font-family: 'Times New Roman', Georgia, Times, serif;
 }
 #root {
     display: flex;
@@ -680,6 +689,8 @@ button#surpriseBtn, button#anotherBtn {
     width: max-content;
     white-space: nowrap;
     margin-bottom: 1em;
+    color: #0b3e8a;
+  font-family: 'Times New Roman', Georgia, Times, serif;
 }
 
 .page-nav{
@@ -708,13 +719,14 @@ button#surpriseBtn, button#anotherBtn {
     align-items: center;
     margin: 2em auto;
     gap: 0.5em;
+    color: white;
 }
 
 #search-input {
     padding: 0.5em 1em;
     font-size: 1rem;
     border-radius: 8px;
-    border: 1px solid #ccc;
+    border: 1px solid #fbf6f6;
     width: 250px;
 }
 
@@ -780,7 +792,7 @@ input[type="email"] {
   text-align: center;
 }
 .settings-box{
- background-image: url('https://img.freepik.com/premium-photo/beautiful-vintage-light-blue-background-wall-paint-decoration-backdrop_1962-1378.jpg');
+ background-image: url('https://i.pinimg.com/736x/22/f8/97/22f897c1f050222d00c901c4a7e64481.jpg');
     
 }
 
@@ -897,7 +909,8 @@ input[type="email"] {
   height: 100vh;
   overflow-y: auto;
   box-sizing: border-box;
-   background-image: url('https://img.freepik.com/premium-photo/beautiful-vintage-light-blue-background-wall-paint-decoration-backdrop_1962-1378.jpg');
+  /*background-image: url('https://img.freepik.com/premium-photo/beautiful-vintage-light-blue-background-wall-paint-decoration-backdrop_1962-1378.jpg');*/
+  background-image: url('https://i.pinimg.com/736x/22/f8/97/22f897c1f050222d00c901c4a7e64481.jpg');
 }
 
 .movies-container {
@@ -1220,13 +1233,14 @@ input[type="email"] {
 .movie-head h1 {
     font-size: 3em;
     font-weight: bold;
-    color: #491377;;
-    text-shadow: 2px 2px 8px rgba(63, 60, 60, 0.7);
+    color: #0b3e8a;
+    text-shadow: 2px 2px 8px rgba(100, 99, 99, 0.7);
 }
 
 .movie-head p {
     font-size: 1.2em;
-    color: #3e0f67;;
+    color: #0b3e8a;
+    font-weight: 550;
 }
 .movie-content {
     display: flex;
@@ -1253,12 +1267,15 @@ input[type="email"] {
     max-width: 1000px;
     margin: 0 auto;
     font-size: 1.1em;
-    color: #3e0f67;;
+    color: #0f3670;
+    font-weight: 550;
+    text-shadow: 2px 2px 8px rgb(146, 172, 246);
     line-height: 1.6;
     background-color: rgba(255, 255, 255, 0.05);
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    justify-content: center;
 }
 
 .movie-info p {
@@ -1266,14 +1283,14 @@ input[type="email"] {
 }
 
 .movie-info strong {
-    color: #701111;
+    color: #a61818;
     font-weight: bold;
 }
 
 .s-add-btn {
   position: relative;
   top: 1px;          
-  left: 7px;        /* distance from right of the card */
+  left: 7px;       
   
   width: 36px;
   height: 36px;
@@ -1313,7 +1330,7 @@ input[type="email"] {
 
 .s-add-menu {
   position: absolute;
-  top: 110%;  /* slight spacing below button */
+  top: 110%; 
   right: 0;
   background-color: #fff;
   border: 1px solid #e0e0e0;
@@ -1336,7 +1353,6 @@ input[type="email"] {
   pointer-events: none;
 }
 
-/* Example styling for items inside the menu */
 .s-add-menu-item {
   padding: 10px 16px;
   cursor: pointer;
@@ -1457,14 +1473,33 @@ a:active {
 }
 
 .add-option {
-  background-color: white;
+  background-color: #ffffff;
   color: #3e0f67;
   padding: 10px 16px;
   border-radius: 6px;
   cursor: pointer;
   transition: 0.3s ease;
 }
-
-.add-option:hover {
+.add-option-m {
+  background-color: #fcb8cf;
+  color: #3e0f67;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s ease;
+  font-size: 14px;
+}
+.add-option:hover, .add-option-m:hover {
   background-color: #00ffff;
+}
+
+.movie-item h4 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /* Maximum of 3 lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2rem;
+  max-height: 3.6rem; /* 1.2 * 3 */
+  font-size: 1rem;
 }

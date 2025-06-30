@@ -122,17 +122,34 @@ exports.getMoviesByGenre = async (req, res) => {
   }
 };
 
+// Simple similarity checker (for overview text)
+function getOverviewScore(overview, favOverviews) {
+  if (!overview) return 0;
+  overview = overview.toLowerCase();
+  let score = 0;
+  favOverviews.forEach(fav => {
+    if (overview.includes(fav.toLowerCase().split(' ').slice(0, 5).join(' '))) {
+      score++;
+    }
+  });
+  return score;
+}
+
 exports.getRecommendedByGenres = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id).populate('favoriteMovies');
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     const favoriteGenres = user.genres;
     if (!favoriteGenres || favoriteGenres.length === 0) {
-      return res.status(200).json({ movies: [] }); // no genres, no recommendations
+      return res.status(200).json({ movies: [] }); // No genres, no recs
     }
 
-    const m = 50; // minimum votes to qualify (you can tweak this)
+    const favoriteOverviews = user.favoriteMovies
+      .filter(m => m.overview)
+      .map(m => m.overview);
+
+    const m = 50; // minimum votes
     const CResult = await Movie.aggregate([
       { $group: { _id: null, averageRating: { $avg: "$rating" } } }
     ]);
@@ -140,7 +157,7 @@ exports.getRecommendedByGenres = async (req, res) => {
 
     const genreRegexes = favoriteGenres.map(g => new RegExp(`\\b${g}\\b`, 'i'));
 
-    const recommendedMovies = await Movie.aggregate([
+    const initialMovies = await Movie.aggregate([
       {
         $match: {
           $or: genreRegexes.map(regex => ({ genres: regex })),
@@ -156,17 +173,29 @@ exports.getRecommendedByGenres = async (req, res) => {
             ]
           }
         }
-      },
-      { $sort: { weightedRating: -1 } },
-      { $limit: 10 }
+      }
     ]);
 
-        res.status(200).json({ movies: recommendedMovies });
-      } catch (error) {
-        console.error('Error fetching recommended movies:', error);
-        res.status(500).json({ message: 'Server error' });
-      }
-    };
+    // Add overview similarity score
+    const finalScored = initialMovies.map(movie => {
+      const overviewScore = getOverviewScore(movie.overview, favoriteOverviews);
+      const finalScore = movie.weightedRating + overviewScore * 0.1; // Adjust weight as needed
+      return { ...movie, finalScore };
+    });
+
+    // Sort by final score (descending)
+const sorted = finalScored.sort((a, b) => b.finalScore - a.finalScore);
+
+// Randomize top 50, then slice 10
+const shuffled = sorted.slice(0, 50).sort(() => Math.random() - 0.5).slice(0, 10);
+
+res.status(200).json({ movies: shuffled });
+    
+  } catch (error) {
+    console.error('Error fetching recommended movies:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
 
 exports.getTopRated = async (req, res) => {
   try {
@@ -182,34 +211,53 @@ exports.getTopRated = async (req, res) => {
 
 exports.getPopularMovies = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id).populate('favoriteMovies');
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    const favoriteGenres = user.genres;
-    if (!favoriteGenres || favoriteGenres.length === 0) {
-      const movies = await Movie.find()
-        .sort({ votes: -1 })
-        .limit(24);
-      return res.json({ movies });
+    const favoriteGenres = user.genres || [];
+    const favoriteOverviews = user.favoriteMovies
+      .filter(m => m.overview)
+      .map(m => m.overview);
+
+    let movies;
+
+    if (favoriteGenres.length === 0) {
+      movies = await Movie.find().sort({ votes: -1 }).limit(100); // fetch more to allow overview scoring
+    } else {
+      const genreRegexes = favoriteGenres.map(g => new RegExp(`\\b${g}\\b`, 'i'));
+      movies = await Movie.find({
+        $or: genreRegexes.map(regex => ({ genres: regex }))
+      })
+        .sort({ votes: -1, popularity: -1 })
+        .limit(100); // fetch more to filter later
     }
 
-    const genreRegexes = favoriteGenres.map(g => new RegExp(`\\b${g}\\b`, 'i'));
+    // Add overview-based score
+    const scoredMovies = movies.map(movie => {
+      const overviewScore = getOverviewScore(movie.overview, favoriteOverviews);
+      const finalScore = (movie.votes || 0) + (movie.popularity || 0) + overviewScore * 10;
+      return { ...movie._doc, finalScore }; // `_doc` to include regular object fields
+    });
 
-    const movies = await Movie.find({
-      $or: genreRegexes.map(regex => ({ genres: regex }))
-    })
-      .sort({ votes: -1, popularity: -1})
-      .limit(24);
+    // Sort by finalScore and take top 24
+    const finalSorted = scoredMovies
+  .sort((a, b) => b.finalScore - a.finalScore);
 
-    if (movies.length === 0) {
-      return res.status(404).json({ message: 'No popular movies found for your favorite genres.' });
-    }
+// Randomize top 30 and select 24
+const randomized = finalSorted.slice(0, 50).sort(() => Math.random() - 0.5).slice(0, 24);
 
-    res.json({ movies });
+if (randomized.length === 0) {
+  return res.status(404).json({ message: 'No popular movies found for your favorite genres.' });
+}
+
+res.json({ movies: randomized });
+
   } catch (error) {
+    console.error('Error fetching popular movies:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
+
 exports.getMostVoted = async (req, res) => {
   try {
     const popularByVotes = await Movie.find({ votes: { $gte: 50 } }) // you can tweak this threshold
@@ -284,13 +332,16 @@ exports.getSimilarMovies = async (req, res) => {
 
     const inputGenres = movie.genres || [];
 
-    // Filter: At least 2 genres must match
-    const genreFiltered = candidates.filter(candidate => {
-      const candidateGenres = candidate.genres || [];
-      const commonGenres = inputGenres.filter(g => candidateGenres.includes(g));
-      return commonGenres.length >= 2;
-    });
+   const genreFiltered = candidates.filter(candidate => {
+    const candidateGenres = candidate.genres || [];
+    const commonGenres = inputGenres.filter(g => candidateGenres.includes(g));
 
+    if (candidateGenres.length <= 1) {
+      return commonGenres.length >= 1;
+    } else {
+      return commonGenres.length >= 2;
+    }
+  });
     // Boost scores based on similarity factors
     const boosted = genreFiltered.map(candidate => {
       let boost = candidate.score || 0;
@@ -391,6 +442,10 @@ exports.getUserRating = async (req, res) => {
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
+    if (!user.ratings || user.ratings.length === 0) {
+      return res.status(200).json({ rating: null });
+    }
+    
     const ratingEntry = user.ratings.find(r => r.movieId.toString() === movieId);
     if (!ratingEntry) {
       return res.status(200).json({ rating: null });

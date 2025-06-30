@@ -1,2 +1,8 @@
-If genres more than 1, keep current, else just use one
-Settings Page final
+Fix email and password verification
+Change font color of add movies
+Inside tracker add a subsection called Rewatch list where you can add movies (rating > 7.5)
+Movie already watched can go to rewatch list when added to watchlist
+If movie getting added twice, alert will say Already Added
+Users can comment on the movies in the community page
+There will be an option called Watch Movie For Free
+If the movie name exceed 3 lines, it gets ....

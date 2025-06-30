@@ -27,7 +27,8 @@ df['combined_features'] = (
     df['title_clean'] + " " +
     df['title_clean'] + " " +
     df['overview'].apply(clean_text) + " " +
-    df['director'].apply(clean_text)
+    df['director'].apply(clean_text) +
+    df['genres'] + " "
 )
 
 tfidf = TfidfVectorizer(stop_words='english', ngram_range=(1, 2))
@@ -65,27 +66,39 @@ def get_matching_titles(title):
         return matches[['id', 'title_with_year', 'rating', 'poster_url']].drop_duplicates().to_dict(orient='records')
 
 
-def tfidf_hybrid_recommend(title_with_year, alpha=0.6, beta=0.2, gamma=0.2, num_recommend=20, min_rating=7.0):
+def tfidf_hybrid_recommend(title_with_year, alpha=0.6, beta=0.2, gamma=0.2, num_recommend=20, min_rating=7.0, exclude_ids=None):
     if title_with_year not in indices:
         return []
+    
+    if exclude_ids is None:
+        exclude_ids = []
 
     movie_idx = indices[title_with_year]
-    input_genres = df['genres'].iloc[movie_idx]
+    input_genres = df['genres'].iloc[movie_idx].lower().replace(" ", "").split(',')
+    primary_genre = input_genres[0]
+    secondary_genres = set(input_genres[1:])
 
     content_sim_scores = list(enumerate(cosine_sim_content[movie_idx]))
     content_sim_scores = sorted(content_sim_scores, key=lambda x: x[1], reverse=True)
 
-    filtered_scores = [
-        (i, score) for i, score in content_sim_scores
-        if (
-            df['rating'].iloc[i] >= 7 and
-            df['votes'].iloc[i] >= 100 and
-            input_genres in df['genres'].iloc[i]  # Optional: keep if genre relevance is needed
-        )
-    ]
+    filtered_scores = []
+    for i, score in content_sim_scores:
+        movie_genres = df['genres'].iloc[i].lower().replace(" ", "").split(',')
+        movie_genres_set = set(movie_genres)
+        if df['rating'].iloc[i] >= min_rating and df['votes'].iloc[i] >= 100:
+            # Calculate genre score
+            genre_score = 0
+            if primary_genre in movie_genres_set:
+                genre_score += 2
+            genre_score += len(secondary_genres & movie_genres_set)
+
+            filtered_scores.append((i, score, genre_score))
 
     if not filtered_scores:
         return []
+
+    # Sort by genre_score (descending), then similarity score (descending)
+    filtered_scores.sort(key=lambda x: (x[2], x[1]), reverse=True)
 
     movie_indices = [i[0] for i in filtered_scores[:num_recommend+20]]
     content_scores = np.array([score[1] for score in filtered_scores[:num_recommend+20]])
@@ -110,7 +123,7 @@ def recommend():
     if movie_title not in indices:
         return jsonify({"error": "Movie not found."}), 404
 
-    results = tfidf_hybrid_recommend(movie_title, alpha=0.5, beta=0.3, gamma=0.2, num_recommend=10, min_rating=6)
+    results = tfidf_hybrid_recommend(movie_title, alpha=0.5, beta=0.3, gamma=0.2, num_recommend=20, min_rating=7)
     
     if not results:
         return jsonify({"error": "No suitable recommendations found."}), 200
@@ -141,10 +154,12 @@ def search_and_recommend():
     if not matched_movies:
         return jsonify({"error": "No movies found with that title."}), 404
     
+    exclude_ids = [str(movie['id']) for movie in matched_movies]  # Convert all to string just in case
+    
     results = []
     for movie in matched_movies:
         title_with_year = movie['title_with_year']
-        recs = tfidf_hybrid_recommend(title_with_year)
+        recs = tfidf_hybrid_recommend(title_with_year, exclude_ids=exclude_ids)
         results.append({
             "id": str(movie['id']),
             "title_with_year": title_with_year,

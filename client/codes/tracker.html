@@ -113,10 +113,10 @@
                         <a href="movie.html?id=${movie.id}">
                             <img src="${movie.poster_url}" alt="${movie.title}" class="movie-poster" />
                             <div class="movie-info">
-                                <h3>${movie.title} (${movie.year})</h3>
+                                <h3 style='text-shadow:none'>${movie.title} (${movie.year})</h3>
                         </a>
-                                <p>⭐ ${movie.rating}</p>
-                                <p>Watched on: ${new Date(movie.watchedAt).toLocaleDateString()}</p>
+                                <p style='text-shadow:none; color: orange;'>🎯 Your Rating: ${movie.userRating ? movie.userRating + '/10' : 'Not Rated Yet'}</p>
+                                <p style='text-shadow:none'>Watched on: ${new Date(movie.watchedAt).toLocaleDateString()}</p>
                                 <button class="remove-btn" onclick="removeFromTracker('${movie.id}')">Remove</button>
                             </div>
                         `;

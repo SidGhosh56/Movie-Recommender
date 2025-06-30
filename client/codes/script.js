@@ -72,34 +72,71 @@ sidebar.addEventListener("click", (e) => {
 });
 
 
-//SURPRISE ME
+document.addEventListener("DOMContentLoaded", () => {
+  const userId = localStorage.getItem("userId"); // Make sure this exists
 
+  if (!userId) {
+    console.error("No user ID found.");
+    return;
+  }
 
-//SETTINGS
-document.getElementById("save-btn").addEventListener("click", () => {
-  const email = document.getElementById("email-input").value;
-  const username = document.getElementById("username-input").value;
-  const darkMode = document.getElementById("darkmode-toggle").checked;
-  const emailNotif = document.getElementById("email-notif").checked;
-  const smsNotif = document.getElementById("sms-notif").checked;
+  loadUserData(userId);
 
-  // Placeholder for saving logic
-  console.log("Settings saved:", {
-    email,
-    username,
-    darkMode,
-    emailNotif,
-    smsNotif
+  document.getElementById("save-btn").addEventListener("click", () => {
+    saveChanges(userId);
   });
-
-  const status = document.getElementById("save-status");
-  status.textContent = "Settings saved successfully!";
-  setTimeout(() => (status.textContent = ""), 3000);
 });
 
+function loadUserData(userId) {
+  fetch(`http://localhost:5000/api/users/${userId}`)
+    .then(response => response.json())
+    .then(user => {
+      // Fill in email and username
+      document.getElementById("email-input").value = user.email;
+      document.getElementById("username-input").value = user.username;
+
+      // Display favorite movies
+      const favList = document.getElementById("favorite-movie-list");
+      favList.innerHTML = ''; // clear existing
+
+      if (user.favoriteMovies.length === 0) {
+        favList.innerHTML = '<li>No favorite movies yet.</li>';
+      } else {
+        user.favoriteMovies.forEach(movie => {
+          const li = document.createElement("li");
+          li.textContent = movie.title;
+          favList.appendChild(li);
+        });
+      }
+    })
+    .catch(error => {
+      console.error("Failed to load user data:", error);
+    });
+}
+
+function saveChanges(userId) {
+  const updatedEmail = document.getElementById("email-input").value;
+  const updatedUsername = document.getElementById("username-input").value;
+
+  fetch(`http://localhost:5000/api/users/${userId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      email: updatedEmail,
+      username: updatedUsername
+    })
+  })
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("save-status").textContent = "Changes saved successfully!";
+    })
+    .catch(error => {
+      console.error("Failed to save changes:", error);
+      document.getElementById("save-status").textContent = "Failed to save changes.";
+    });
+}
 
 //PROFILE 
-
 const editBtn = document.getElementById('edit-profile-btn');
 const saveBtn = document.getElementById('save-profile-btn');
 const bioInput = document.getElementById('user-bio');

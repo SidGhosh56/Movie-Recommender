@@ -18,5 +18,8 @@ router.post('/tracker', auth, userController.addWatchedMovie);
 router.delete('/tracker/:movieId', auth, userController.removeWatchedMovie);
 router.get('/watched-movies', auth, userController.getWatchedMovies);
 
+router.get('/:id', userController.getUser);
+
+router.put('/:id', userController.updateUser);
 
 module.exports = router;
