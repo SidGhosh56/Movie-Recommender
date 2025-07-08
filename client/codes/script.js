@@ -82,9 +82,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   loadUserData(userId);
 
-  document.getElementById("save-btn").addEventListener("click", () => {
-    saveChanges(userId);
-  });
 });
 
 function loadUserData(userId) {
