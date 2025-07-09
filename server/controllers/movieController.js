@@ -369,10 +369,23 @@ exports.getSimilarMovies = async (req, res) => {
       return { ...candidate, score: boost };
     });
 
-    // Final top 10
-    const topMovies = boosted.sort((a, b) => b.score - a.score).slice(0, 10);
+    // Step 1: Sort by score descending
+const sorted = boosted.sort((a, b) => b.score - a.score);
 
-    res.json({ movies: topMovies });
+// Step 2: Take top 25
+const top25 = sorted.slice(0, 25);
+
+// Step 3: Shuffle the top 25 using Fisher-Yates shuffle
+for (let i = top25.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [top25[i], top25[j]] = [top25[j], top25[i]];
+}
+
+// Step 4: Take the first 10 from the shuffled top 25
+const topMovies = top25.slice(0, 10);
+
+// Respond with randomized top 10 from top 25
+res.json({ movies: topMovies });
 
   } catch (error) {
     console.error('Error fetching similar movies:', error);
