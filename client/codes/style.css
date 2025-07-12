@@ -306,10 +306,10 @@ hr{
 }
 
 footer{
-  height: 45px;                  /* fixed footer height */
+  height: 45px;                  
   background-color: #1e0048;
   color: rgb(204, 146, 212);
-  text-align: right;
+  text-align: center;
   padding: 4px 10px;
   flex-shrink: 0;
   color: #31cad5;
